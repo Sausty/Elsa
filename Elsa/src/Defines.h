@@ -1,54 +1,69 @@
+/**
+ * @file Defines.h
+ * @author Milo Heinrich (MikuoH15TH@gmail.com)
+ * @brief This file contains global type definitions which are used 
+ * throughout the entire engine and applications referencing it. 
+ * @version 1.0
+ * @date 2022-06-17
+ */
+
 #ifndef ELSA_DEFINES_H
 #define ELSA_DEFINES_H
 
-// Signed 8-bit numeric type
+/** @brief Signed 8-bit numeric type */
 typedef char i8;
 
-// Unsigned 8-bit numeric type
+/** @brief Unsigned 8-bit numeric type */
 typedef unsigned char u8;
 
-// Signed 16-bit numeric type
+/** @brief Signed 16-bit numeric type */
 typedef short i16;
 
-// Unsigned 16-bit numeric type
+/** @brief Unsigned 16-bit numeric type */
 typedef unsigned short u16;
 
-// Signed 32-bit numeric type
+/** @brief Signed 32-bit numeric type */
 typedef int i32;
 
-// Unsigned 32-bit numeric type
+/** @brief Unsigned 32-bit numeric type */
 typedef unsigned int u32;
 
-// Signed 64-bit numeric type
+/** @brief Signed 64-bit numeric type */
 typedef long long i64;
 
-// Unsigned 64-bit numeric type
+/** @brief Unsigned 64-bit numeric type */
 typedef unsigned long long u64;
 
-// 32-bit floating point type
+/** @brief 32-bit floating point type */
 typedef float f32;
 
-// 64-bit floating point type
+/** @brief 64-bit floating point type */
 typedef double f64;
 
-// 8-bit boolean type
+/** @brief 8-bit boolean value */
 typedef i8 b8;
 
-// Boolean values
+/** @brief True. */
 #define true 1
+
+/** @brief False. */
 #define false 0
 
 // Export directives
 #ifdef ELSA_EXPORT
     #ifdef _MSC_VER
+        /** @brief Import/export qualifier */
         #define ELSA_API __declspec(dllexport)
     #else
+        /** @brief Import/export qualifier */
         #define ELSA_API __attribute__((visibility("default")))
     #endif
 #else
     #ifdef _MSC_VER
+        /** @brief Import/export qualifier */
         #define ELSA_API __declspec(dllimport)
     #else
+        /** @brief Import/export qualifier */
         #define ELSA_API
     #endif
 #endif

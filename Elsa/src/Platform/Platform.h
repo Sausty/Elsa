@@ -1,3 +1,13 @@
+/**
+ * @file Platform.h
+ * @author Milo Heinrich (MikuoH15TH@gmail.com)
+ * @brief This file contains the platform layer, or at least the interface to it.
+ * Each platform should provide its own implementation of this in a .c file, and 
+ * should be compiled exclusively of the rest.
+ * @version 1.0
+ * @date 2022-06-17
+ */
+
 #ifndef ELSA_PLATFORM_H
 #define ELSA_PLATFORM_H
 
