@@ -12,6 +12,28 @@
 #define ELSA_PLATFORM_H
 
 #include <Defines.h>
+#include <ApplicationTypes.h>
+
+/**
+ * @brief Performs startup routines within the platform layer. 
+ * 
+ * @param application_state The application state.
+ * @return True on success; otherwise false.
+ */
+ELSA_API b8 PlatformInit(ApplicationState* application_state);
+
+/**
+ * @brief Shuts down the platform layer.
+ */
+ELSA_API void PlatformExit();
+
+/**
+ * @brief Performs any platform-specific message pumping that is required
+ * for windowing, etc.
+ * 
+ * @return True on success; otherwise false.
+ */
+ELSA_API b8 PlatformPumpMessages();
 
 /**
  * @brief Performs a memory allocation from the host of given size.
