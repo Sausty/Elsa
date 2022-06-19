@@ -81,7 +81,6 @@ b8 EventUnregister(u16 code, void* listener, PFN_OnEvent on_event)
 b8 EventFire(u16 code, void* sender, Event data)
 {
     if (state.Registered[code].Events == 0) {
-        ELSA_WARN("Trying to fire an event without any listeners! (Code: %u)", code);
         return false;
     }
 

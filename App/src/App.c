@@ -2,6 +2,7 @@
 
 #include <Core/Logger.h>
 #include <Core/Event.h>
+#include <Core/Input.h>
 
 b8 GameInit(Game* game)
 {
@@ -12,6 +13,9 @@ b8 GameInit(Game* game)
 
 b8 GameUpdate(Game* game)
 {
+    if (InputIsKeyDown(KEY_I))
+        ELSA_INFO("I key was pressed!");
+
     return true;
 }
 

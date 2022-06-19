@@ -19,6 +19,11 @@ b8 ApplicationOnEvent(u16 code, void* sender, void* listener, Event event)
     return false;
 }
 
+b8 ApplicationOnKey(u16 code, void* sender, void* listene, Event event)
+{
+    return false;
+}
+
 b8 ApplicationOnResize(u16 code, void* sender, void* listener, Event event)
 {
     if (code == EVENT_CODE_RESIZED) {
@@ -50,6 +55,8 @@ b8 ApplicationCreate(struct Game* game)
 
     EventRegister(EVENT_CODE_APPLICATION_QUIT, 0, ApplicationOnEvent);
     EventRegister(EVENT_CODE_RESIZED, 0, ApplicationOnResize);
+    EventRegister(EVENT_CODE_KEY_PRESSED, 0, ApplicationOnKey);
+    EventRegister(EVENT_CODE_KEY_RELEASED, 0, ApplicationOnKey);
 
     PlatformInit(&app_state);
 
@@ -69,12 +76,17 @@ b8 ApplicationRun()
         if (!PlatformPumpMessages()) {
             app_state.Running = false;
         }
+
+        app_state.game->Update(app_state.game);
+        app_state.game->Render(app_state.game);
     }
 
     app_state.Running = false;
 
     EventUnregister(EVENT_CODE_RESIZED, 0, ApplicationOnResize);
     EventUnregister(EVENT_CODE_APPLICATION_QUIT, 0, ApplicationOnEvent);
+    EventUnregister(EVENT_CODE_KEY_PRESSED, 0, ApplicationOnKey);
+    EventUnregister(EVENT_CODE_KEY_RELEASED, 0, ApplicationOnKey);
 
     return true;
 }
