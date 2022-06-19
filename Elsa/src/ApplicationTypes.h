@@ -21,6 +21,7 @@ typedef struct Game {
     } AppConfig;
 
     b8 (*Init)(struct Game* game);
+    b8 (*Free)(struct Game* game);
     b8 (*Update)(struct Game* game);
     b8 (*Render)(struct Game* game);
     void (*OnResize)(struct Game* game, u32 width, u32 height);

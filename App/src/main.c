@@ -10,6 +10,7 @@ b8 CreateGame(Game* out_game, int argc, char** argv)
     out_game->AppConfig.Height = 720;
     out_game->AppConfig.Name = "Elsa Application";
     out_game->Init = GameInit;
+    out_game->Free = GameFree;
     out_game->Render = GameRender;
     out_game->Update = GameUpdate;
     out_game->OnResize = GameResize;

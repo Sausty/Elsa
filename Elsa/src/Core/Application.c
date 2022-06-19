@@ -2,6 +2,7 @@
 
 #include <Core/Event.h>
 #include <Core/Logger.h>
+#include <Audio/Audio.h>
 #include <Platform/Platform.h>
 
 static ApplicationState app_state;
@@ -59,6 +60,7 @@ b8 ApplicationCreate(struct Game* game)
     EventRegister(EVENT_CODE_KEY_RELEASED, 0, ApplicationOnKey);
 
     PlatformInit(&app_state);
+    AudioInit();
 
     if (!app_state.game->Init(app_state.game)) {
         ELSA_FATAL("Game failed to initialize.");
@@ -77,9 +79,14 @@ b8 ApplicationRun()
             app_state.Running = false;
         }
 
+        AudioUpdate();
+
         app_state.game->Update(app_state.game);
         app_state.game->Render(app_state.game);
     }
+
+    if (!app_state.game->Free(app_state.game))
+        ELSA_ERROR("Game failed to terminate.");
 
     app_state.Running = false;
 
@@ -87,6 +94,9 @@ b8 ApplicationRun()
     EventUnregister(EVENT_CODE_APPLICATION_QUIT, 0, ApplicationOnEvent);
     EventUnregister(EVENT_CODE_KEY_PRESSED, 0, ApplicationOnKey);
     EventUnregister(EVENT_CODE_KEY_RELEASED, 0, ApplicationOnKey);
+
+    AudioExit();
+    PlatformExit();
 
     return true;
 }

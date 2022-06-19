@@ -10,7 +10,7 @@ FOR /R %%f in (*.c) do (
 
 SET Assembly=Elsa
 SET CompilerFlags=-g -shared -Wvarargs -Wall -Werror
-SET IncludeFlags=-Isrc
+SET IncludeFlags=-Isrc -Ivendor
 SET LinkerFlags=-luser32 -lgdi32 -lkernel32
 SET Defines=-D_DEBUG -DELSA_EXPORT -D_CRT_SECURE_NO_WARNINGS
 
