@@ -32,7 +32,12 @@ b8 GameFree(Game* game)
 
 b8 GameUpdate(Game* game)
 {
-    ELSA_INFO("(%f, %f)", InputGetGamepadTrigger(0, GAMEPAD_ANALOG_LEFT), InputGetGamepadTrigger(0, GAMEPAD_ANALOG_RIGHT));
+    f32 x = 0.0f;
+    f32 y = 0.0f;
+    
+    InputGetGamepadJoystick(0, GAMEPAD_ANALOG_LEFT, &x, &y);
+
+    ELSA_INFO("(%f, %f)", x, y);
 
     return true;
 }

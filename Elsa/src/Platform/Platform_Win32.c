@@ -10,6 +10,7 @@
 #include <windowsx.h>
 #include <xinput.h>
 #include <shellapi.h>
+#include <math.h>
 
 typedef struct Gamepad {
     XINPUT_STATE State;
@@ -32,6 +33,31 @@ PFN_XINPUT_GET_STATE XInputGetStateProc;
 static PlatformState platform_state;
 
 LRESULT CALLBACK PlatformProcessMessages(HWND hwnd, u32 msg, WPARAM w_param, LPARAM l_param);
+
+f32 Normalize(f32 input, f32 min, f32 max)
+{
+    f32 average = (min + max) / 2;
+    f32 range = (max - min) / 2;
+    return (input - average) / range;
+}
+
+f32 ApplyDeadzone(f32 value, f32 maxValue, f32 deadzone)
+{
+    if (value < -deadzone)
+    {
+        value += deadzone; 
+    }
+    else if (value > deadzone)
+    {
+        value -= deadzone; 
+    }
+    else
+    {
+        return 0; 
+    }
+    f32 normValue = (float)value / (float)(maxValue - deadzone);
+    return max(-1.0f, min(normValue, 1.0f));
+}
 
 b8 PlatformInit(ApplicationState* application_state)
 {
@@ -172,6 +198,36 @@ void PlatformUpdateGamepads()
 
             InputProcessGamepadTrigger(i, left_trigger, GAMEPAD_ANALOG_LEFT);
             InputProcessGamepadTrigger(i, right_trigger, GAMEPAD_ANALOG_RIGHT);
+
+            f32 normLX = Normalize((f32)state.Gamepad.sThumbLX, -32767, 32767);
+            f32 normLY = Normalize((f32)state.Gamepad.sThumbLY, -32767, 32767);
+
+            f32 normRX = Normalize((f32)state.Gamepad.sThumbRX, -32767, 32767);
+            f32 normRY = Normalize((f32)state.Gamepad.sThumbRY, -32767, 32767);
+
+            f32 lx = 0.0f;
+            f32 ly = 0.0f;
+
+            f32 rx = 0.0f;
+            f32 ry = 0.0f;
+
+            if (XINPUT_GAMEPAD_LEFT_THUMB_DEADZONE <= 1.0f || XINPUT_GAMEPAD_RIGHT_THUMB_DEADZONE <= 1.0f)
+            {
+                lx = ApplyDeadzone(normLX,  1.0f, XINPUT_GAMEPAD_LEFT_THUMB_DEADZONE);
+                ly = ApplyDeadzone(normLY,  1.0f, XINPUT_GAMEPAD_RIGHT_THUMB_DEADZONE);
+                rx = ApplyDeadzone(normRX,  1.0f, XINPUT_GAMEPAD_LEFT_THUMB_DEADZONE);
+                ry = ApplyDeadzone(normRY,  1.0f, XINPUT_GAMEPAD_RIGHT_THUMB_DEADZONE);
+            }
+            else
+            {
+                lx = ApplyDeadzone(normLX,  1.0f, Normalize(XINPUT_GAMEPAD_LEFT_THUMB_DEADZONE, SHRT_MIN, SHRT_MAX));
+                ly = ApplyDeadzone(normLY,  1.0f, Normalize(XINPUT_GAMEPAD_RIGHT_THUMB_DEADZONE, SHRT_MIN, SHRT_MAX));
+                rx = ApplyDeadzone(normRX,  1.0f, Normalize(XINPUT_GAMEPAD_LEFT_THUMB_DEADZONE, SHRT_MIN, SHRT_MAX));
+                ry = ApplyDeadzone(normRY,  1.0f, Normalize(XINPUT_GAMEPAD_RIGHT_THUMB_DEADZONE, SHRT_MIN, SHRT_MAX));
+            }
+
+            InputProcessGamepadJoystick(i, lx, ly, GAMEPAD_ANALOG_LEFT);
+            InputProcessGamepadJoystick(i, rx, ry, GAMEPAD_ANALOG_RIGHT);
 
             platform_state.Pads[i].State = state;
         }

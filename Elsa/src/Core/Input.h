@@ -472,6 +472,15 @@ ELSA_API b8 InputWasGamepadButtonReleased(i32 index, GamepadButtons button);
 ELSA_API f32 InputGetGamepadTrigger(i32 index, GamepadAnalog analog);
 
 /**
+ * @brief Gets the joystick values of the requested gamepad.
+ * @param index The index of the gamepad.
+ * @param analog The position of the joystick.
+ * @param x A pointer to hold the X value of the joystick.
+ * @param y A pointer to hold the Y value of the joystick.
+ */
+ELSA_API void InputGetGamepadJoystick(i32 index, GamepadAnalog analog, f32* x, f32* y);
+
+/**
  * @brief Sets the press state of the given gamepad button.
  * @param index The gamepad index whose state to set.
  * @param button The gamepad button whose state to set.
@@ -486,5 +495,14 @@ ELSA_API void InputProcessGamepadButton(i32 index, GamepadButtons button, b8 pre
  * @param analog The analog position of the trigger.
  */
 ELSA_API void InputProcessGamepadTrigger(i32 index, f32 value, GamepadAnalog analog);
+
+/**
+ * @brief Sets the analog values of the given joystick.
+ * @param index The gamepad index whose state to set.
+ * @param x The X value of the joystick.
+ * @param y The Y value of the joystick.
+ * @param analog The position of the joystick.
+ */
+ELSA_API void InputProcessGamepadJoystick(i32 index, f32 x, f32 y, GamepadAnalog analog);
 
 #endif
