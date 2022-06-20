@@ -89,6 +89,7 @@ void AudioUpdate()
 AudioClip* AudioLoadClip(const char* path)
 {
     AudioClip* out = PlatformAlloc(sizeof(AudioClip));
+    PlatformZeroMemory(out, sizeof(AudioClip));
 
     if (!drwav_init_file(&out->Wav, path, NULL))
         ELSA_FATAL("Failed to load audio clip from path: %s", path);
@@ -120,14 +121,14 @@ void AudioPlayClip(AudioClip* clip)
 
     ma_decoder_seek_to_pcm_frame(&clip->Decoder, 0);
 
-    clip->Playing = 1;
+    clip->Playing = true;
     state.Clips[state.ClipCount] = clip;
     clip->ID = state.ClipCount++;
 }
 
 void AudioStopClip(AudioClip* clip)
 {
-    clip->Playing = 0;
+    clip->Playing = false;
 
     state.Clips[clip->ID] = state.Clips[state.ClipCount - 1];
     state.Clips[clip->ID]->ID = clip->ID;

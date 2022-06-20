@@ -13,12 +13,12 @@ static AppData app;
 
 b8 GameInit(Game* game)
 {
-    ELSA_DEBUG("GameInit() called");
-
     app.BGM = AudioLoadClip("Assets/Audio/SyncamoreTheme.wav");
     AudioSetClipVolume(app.BGM, 0.3f);
     AudioLoopClip(app.BGM, true);
     AudioPlayClip(app.BGM);
+
+    ELSA_DEBUG("GameInit() called");
 
     return true;
 }
@@ -32,10 +32,6 @@ b8 GameFree(Game* game)
 
 b8 GameUpdate(Game* game)
 {
-    if (InputIsGamepadButtonPressed(0, GAMEPAD_A))
-        InputSetGamepadVibration(0, 65535, 65535);
-    else
-        InputResetGamepadVibration(0);
 
     return true;
 }

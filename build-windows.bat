@@ -7,12 +7,12 @@ IF NOT EXIST bin (
 
 REM Elsa
 PUSHD Elsa
-CALL build.bat 
+CALL build-windows.bat 
 POPD
 
 REM App
 PUSHD App
-CALL build.bat
+CALL build-windows.bat
 POPD
 
 ECHO "All assemblies built successfully."

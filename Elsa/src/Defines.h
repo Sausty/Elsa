@@ -81,7 +81,7 @@ typedef i8 b8;
         #define ELSA_PLATFORM_IPHONE
     #else
         #define TARGET_OS_OSX 1
-        #define ELSA_PLATFORM_OSX
+        #define ELSA_PLATFORM_MACOS
     #endif
 #elif __linux
     #define ELSA_PLATFORM_LINUX
