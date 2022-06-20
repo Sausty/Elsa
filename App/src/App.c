@@ -32,12 +32,10 @@ b8 GameFree(Game* game)
 
 b8 GameUpdate(Game* game)
 {
-    f32 x = 0.0f;
-    f32 y = 0.0f;
-    
-    InputGetGamepadJoystick(0, GAMEPAD_ANALOG_LEFT, &x, &y);
-
-    ELSA_INFO("(%f, %f)", x, y);
+    if (InputIsGamepadButtonPressed(0, GAMEPAD_A))
+        InputSetGamepadVibration(0, 65535, 65535);
+    else
+        InputResetGamepadVibration(0);
 
     return true;
 }

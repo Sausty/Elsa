@@ -481,6 +481,28 @@ ELSA_API f32 InputGetGamepadTrigger(i32 index, GamepadAnalog analog);
 ELSA_API void InputGetGamepadJoystick(i32 index, GamepadAnalog analog, f32* x, f32* y);
 
 /**
+ * @brief Sets the vibration values of the requested gamepad.
+ * @param index The index of the gamepad.
+ * @param right The speed of the right motor.
+ * @param left The speed of the left motor.
+ */
+ELSA_API void InputSetGamepadVibration(i32 index, u16 right, u16 left);
+
+/**
+ * @brief Resets the vibration of the requested gamepad.
+ * @param index The index of the gamepad.
+ */
+ELSA_API void InputResetGamepadVibration(i32 index);
+
+/**
+ * @brief Gets the vibration values of the requested gamepad.
+ * @param index The index of the gamepad.
+ * @param right A pointer to hold the right motor value.
+ * @param left A pointer to hold the left motor value.
+ */
+ELSA_API void InputGetGamepadVibration(i32 index, u16* right, u16* left);
+
+/**
  * @brief Sets the press state of the given gamepad button.
  * @param index The gamepad index whose state to set.
  * @param button The gamepad button whose state to set.

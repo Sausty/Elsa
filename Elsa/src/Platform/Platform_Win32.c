@@ -28,7 +28,10 @@ typedef struct PlatformState {
 } PlatformState;
 
 typedef DWORD (WINAPI* PFN_XINPUT_GET_STATE)(DWORD dwUserIndex, XINPUT_STATE* pState);
+typedef DWORD (WINAPI* PFN_XINPUT_SET_STATE)(DWORD dwUserIndex, XINPUT_VIBRATION* pVibration);
+
 PFN_XINPUT_GET_STATE XInputGetStateProc;
+PFN_XINPUT_SET_STATE XInputSetStateProc;
 
 static PlatformState platform_state;
 
@@ -72,6 +75,11 @@ b8 PlatformInit(ApplicationState* application_state)
     XInputGetStateProc = (PFN_XINPUT_GET_STATE)GetProcAddress(platform_state.XInputLib, "XInputGetState");
     if (!XInputGetStateProc) {
         ELSA_FATAL("Failed to load XInputGetState function!");
+        return false;
+    }
+    XInputSetStateProc = (PFN_XINPUT_SET_STATE)GetProcAddress(platform_state.XInputLib, "XInputSetState");
+    if (!XInputSetStateProc) {
+        ELSA_FATAL("Failed to load XInputSetState function!");
         return false;
     }
 
@@ -228,6 +236,10 @@ void PlatformUpdateGamepads()
 
             InputProcessGamepadJoystick(i, lx, ly, GAMEPAD_ANALOG_LEFT);
             InputProcessGamepadJoystick(i, rx, ry, GAMEPAD_ANALOG_RIGHT);
+
+            XINPUT_VIBRATION vibration;
+            InputGetGamepadVibration(i, &vibration.wRightMotorSpeed, &vibration.wLeftMotorSpeed);
+            XInputSetStateProc(i, &vibration);
 
             platform_state.Pads[i].State = state;
         }
