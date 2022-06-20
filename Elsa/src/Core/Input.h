@@ -48,6 +48,16 @@ typedef enum GamepadButtons {
 } GamepadButtons;
 
 /**
+ * @brief Represents analog gamepad inputs for triggers and analog sticks.
+ */
+typedef enum GamepadAnalog {
+    /** @brief The left analog input */
+    GAMEPAD_ANALOG_LEFT,
+    /** @brief The right analog input */
+    GAMEPAD_ANALOG_RIGHT
+} GamepadAnalog;
+
+/**
  * @brief Represents available mouse buttons.
  */
 typedef enum Buttons {
@@ -454,11 +464,27 @@ ELSA_API b8 InputWasGamepadButtonPressed(i32 index, GamepadButtons button);
 ELSA_API b8 InputWasGamepadButtonReleased(i32 index, GamepadButtons button);
 
 /**
+ * @brief Returns the analog value of the requested trigger.
+ * @param index The index of the gamepad.
+ * @param analog The position of the trigger.
+ * @returns The analog value of the trigger.
+ */
+ELSA_API f32 InputGetGamepadTrigger(i32 index, GamepadAnalog analog);
+
+/**
  * @brief Sets the press state of the given gamepad button.
  * @param index The gamepad index whose state to set.
  * @param button The gamepad button whose state to set.
  * @param pressed Indicates if the gamepad button is currently pressed.
  */
 ELSA_API void InputProcessGamepadButton(i32 index, GamepadButtons button, b8 pressed);
+
+/**
+ * @brief Sets the analog value of the given trigger.
+ * @param index The gamepad index whose state to set.
+ * @param value The analog value to set.
+ * @param analog The analog position of the trigger.
+ */
+ELSA_API void InputProcessGamepadTrigger(i32 index, f32 value, GamepadAnalog analog);
 
 #endif

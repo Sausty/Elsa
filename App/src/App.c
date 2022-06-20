@@ -32,14 +32,7 @@ b8 GameFree(Game* game)
 
 b8 GameUpdate(Game* game)
 {
-    if (InputIsGamepadButtonPressed(0, GAMEPAD_A))
-        ELSA_INFO("Controller 0: Gamepad A");
-    if (InputIsGamepadButtonPressed(0, GAMEPAD_B))
-        ELSA_INFO("Controller 0: Gamepad B");
-    if (InputIsGamepadButtonPressed(0, GAMEPAD_X))
-        ELSA_INFO("Controller 0: Gamepad X");
-    if (InputIsGamepadButtonPressed(0, GAMEPAD_Y))
-        ELSA_INFO("Controller 0: Gamepad Y");
+    ELSA_INFO("(%f, %f)", InputGetGamepadTrigger(0, GAMEPAD_ANALOG_LEFT), InputGetGamepadTrigger(0, GAMEPAD_ANALOG_RIGHT));
 
     return true;
 }

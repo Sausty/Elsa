@@ -167,6 +167,12 @@ void PlatformUpdateGamepads()
             InputProcessGamepadButton(i, GAMEPAD_RIGHT_THUMB,    (state.Gamepad.wButtons & XINPUT_GAMEPAD_RIGHT_THUMB) != 0);
             InputProcessGamepadButton(i, GAMEPAD_RIGHT_SHOULDER, (state.Gamepad.wButtons & XINPUT_GAMEPAD_RIGHT_SHOULDER) != 0);
 
+            f32 left_trigger = (f32)state.Gamepad.bLeftTrigger / 255;
+            f32 right_trigger = (f32)state.Gamepad.bRightTrigger / 255;
+
+            InputProcessGamepadTrigger(i, left_trigger, GAMEPAD_ANALOG_LEFT);
+            InputProcessGamepadTrigger(i, right_trigger, GAMEPAD_ANALOG_RIGHT);
+
             platform_state.Pads[i].State = state;
         }
     }

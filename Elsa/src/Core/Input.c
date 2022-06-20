@@ -15,6 +15,8 @@ typedef struct MouseState {
 
 typedef struct ControllerState {
     u8 Buttons[GAMEPAD_MAX_BUTTONS];
+
+    f32 Triggers[2];
 } ControllerState;
 
 typedef struct InputState {
@@ -153,6 +155,11 @@ b8 InputWasGamepadButtonReleased(i32 index, GamepadButtons button)
     return state.GamepadPrevious[index].Buttons[button] == false;
 }
 
+f32 InputGetGamepadTrigger(i32 index, GamepadAnalog analog)
+{
+    return state.GamepadCurrent[index].Triggers[analog];
+}
+
 void InputProcessGamepadButton(i32 index, GamepadButtons button, b8 pressed)
 {
     state.GamepadCurrent[index].Buttons[button] = pressed;
@@ -160,4 +167,9 @@ void InputProcessGamepadButton(i32 index, GamepadButtons button, b8 pressed)
     Event event;
     event.data.u16[0] = button;
     EventFire(pressed ? EVENT_CODE_GAMEPAD_BUTTON_PRESSED : EVENT_CODE_GAMEPAD_BUTTON_RELEASED, 0, event);
+}
+
+void InputProcessGamepadTrigger(i32 index, f32 value, GamepadAnalog analog)
+{
+    state.GamepadCurrent[index].Triggers[analog] = value;
 }
