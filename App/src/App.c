@@ -32,8 +32,14 @@ b8 GameFree(Game* game)
 
 b8 GameUpdate(Game* game)
 {
-    if (InputIsKeyDown(KEY_I))
-        ELSA_INFO("I key was pressed!");
+    if (InputIsGamepadButtonPressed(0, GAMEPAD_A))
+        ELSA_INFO("Controller 0: Gamepad A");
+    if (InputIsGamepadButtonPressed(0, GAMEPAD_B))
+        ELSA_INFO("Controller 0: Gamepad B");
+    if (InputIsGamepadButtonPressed(0, GAMEPAD_X))
+        ELSA_INFO("Controller 0: Gamepad X");
+    if (InputIsGamepadButtonPressed(0, GAMEPAD_Y))
+        ELSA_INFO("Controller 0: Gamepad Y");
 
     return true;
 }

@@ -13,6 +13,41 @@
 #include <Defines.h>
 
 /**
+ * @brief Represents available controller buttons.
+ */
+typedef enum GamepadButtons {
+    /** @brief The up direction on the DPad */
+    GAMEPAD_DPAD_UP,
+    /** @brief The down direction on the DPad */
+    GAMEPAD_DPAD_DOWN,
+    /** @brief The left direction on the DPad */
+    GAMEPAD_DPAD_LEFT,
+    /** @brief The right direction on the DPad */
+    GAMEPAD_DPAD_RIGHT,
+    /** @brief The start button */
+    GAMEPAD_START,
+    /** @brief The back button */
+    GAMEPAD_BACK,
+    /** @brief The left thumb */
+    GAMEPAD_LEFT_THUMB,
+    /** @brief The right thumb */
+    GAMEPAD_RIGHT_THUMB,
+    /** @brief The left shoulder */
+    GAMEPAD_LEFT_SHOULDER,
+    /** @brief The right shoulder */
+    GAMEPAD_RIGHT_SHOULDER,
+    /** @brief The A button */
+    GAMEPAD_A,
+    /** @brief The B button */
+    GAMEPAD_B,
+    /** @brief The X button */
+    GAMEPAD_X,
+    /** @brief The Y button */
+    GAMEPAD_Y,
+    GAMEPAD_MAX_BUTTONS
+} GamepadButtons;
+
+/**
  * @brief Represents available mouse buttons.
  */
 typedef enum Buttons {
@@ -385,5 +420,45 @@ ELSA_API void InputProcessMouseMove(i16 x, i16 y);
  * @param z_delta The amount of scrolling which occurred on the z axis (mouse wheel)
  */
 ELSA_API void InputProcessMouseWheel(i8 z_delta);
+
+/**
+ * @brief Indicates if the given gamepad button is currently pressed.
+ * @param index The index of the gamepad.
+ * @param button The button to check.
+ * @returns True if currently pressed; otherwise false.
+ */
+ELSA_API b8 InputIsGamepadButtonPressed(i32 index, GamepadButtons button);
+
+/**
+ * @brief Indicates if the given gamepad button is currently released.
+ * @param index The index of the gamepad.
+ * @param button The button to check.
+ * @returns True if currently released; otherwise false.
+ */
+ELSA_API b8 InputIsGamepadButtonReleased(i32 index, GamepadButtons button);
+
+/**
+ * @brief Indicates if the given gamepad button was pressed in the last frame.
+ * @param index The index of the gamepad.
+ * @param button The button to check.
+ * @returns True if was pressed; otherwise false.
+ */
+ELSA_API b8 InputWasGamepadButtonPressed(i32 index, GamepadButtons button);
+
+/**
+ * @brief Indicates if the given gamepad button was released in the last frame.
+ * @param index The index of the gamepad.
+ * @param button The button to check.
+ * @returns True if was released; otherwise false.
+ */
+ELSA_API b8 InputWasGamepadButtonReleased(i32 index, GamepadButtons button);
+
+/**
+ * @brief Sets the press state of the given gamepad button.
+ * @param index The gamepad index whose state to set.
+ * @param button The gamepad button whose state to set.
+ * @param pressed Indicates if the gamepad button is currently pressed.
+ */
+ELSA_API void InputProcessGamepadButton(i32 index, GamepadButtons button, b8 pressed);
 
 #endif

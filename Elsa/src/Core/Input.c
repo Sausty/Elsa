@@ -13,11 +13,17 @@ typedef struct MouseState {
     u8 Buttons[BUTTON_MAX_BUTTONS];
 } MouseState;
 
+typedef struct ControllerState {
+    u8 Buttons[GAMEPAD_MAX_BUTTONS];
+} ControllerState;
+
 typedef struct InputState {
     KeyboardState KeyboardCurrent;
     KeyboardState KeyboardPrevious;
     MouseState MouseCurrent;
     MouseState MousePrevious;
+    ControllerState GamepadCurrent[4];
+    ControllerState GamepadPrevious[4];
 } InputState;
 
 static InputState state;
@@ -26,6 +32,10 @@ void InputUpdate()
 {
     PlatformCopyMemory(&state.KeyboardPrevious, &state.KeyboardCurrent, sizeof(KeyboardState));
     PlatformCopyMemory(&state.MousePrevious, &state.MouseCurrent, sizeof(MouseState));
+
+    for (i32 i = 0; i < 4; i++) {
+        PlatformCopyMemory(&state.GamepadPrevious[i], &state.GamepadCurrent[i], sizeof(ControllerState));
+    }
 }
 
 void InputProcessKey(Keys key, b8 pressed)
@@ -121,4 +131,33 @@ void InputGetPreviousMousePosition(i32* x, i32* y)
 {
     *x = state.MousePrevious.X;
     *y = state.MousePrevious.Y;
+}
+
+b8 InputIsGamepadButtonPressed(i32 index, GamepadButtons button)
+{
+    return state.GamepadCurrent[index].Buttons[button] == true;
+}
+
+b8 InputIsGamepadButtonReleased(i32 index, GamepadButtons button)
+{
+    return state.GamepadCurrent[index].Buttons[button] == false;
+}
+
+b8 InputWasGamepadButtonPressed(i32 index, GamepadButtons button)
+{
+    return state.GamepadPrevious[index].Buttons[button] == true;
+}
+
+b8 InputWasGamepadButtonReleased(i32 index, GamepadButtons button)
+{
+    return state.GamepadPrevious[index].Buttons[button] == false;
+}
+
+void InputProcessGamepadButton(i32 index, GamepadButtons button, b8 pressed)
+{
+    state.GamepadCurrent[index].Buttons[button] = pressed;
+
+    Event event;
+    event.data.u16[0] = button;
+    EventFire(pressed ? EVENT_CODE_GAMEPAD_BUTTON_PRESSED : EVENT_CODE_GAMEPAD_BUTTON_RELEASED, 0, event);
 }

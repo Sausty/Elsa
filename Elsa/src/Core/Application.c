@@ -20,11 +20,6 @@ b8 ApplicationOnEvent(u16 code, void* sender, void* listener, Event event)
     return false;
 }
 
-b8 ApplicationOnKey(u16 code, void* sender, void* listene, Event event)
-{
-    return false;
-}
-
 b8 ApplicationOnResize(u16 code, void* sender, void* listener, Event event)
 {
     if (code == EVENT_CODE_RESIZED) {
@@ -44,6 +39,20 @@ b8 ApplicationOnResize(u16 code, void* sender, void* listener, Event event)
     return false;
 }
 
+b8 ApplicationOnControllerConnect(u16 code, void* sender, void* listener, Event event)
+{
+    ELSA_INFO("Controller Connected at port %i", event.data.u16[0]);
+
+    return false;
+}
+
+b8 ApplicationOnControllerDisconnect(u16 code, void* sender, void* listener, Event event)
+{
+    ELSA_INFO("Controller disconnected at port %i", event.data.u16[0]);
+
+    return false;
+}
+
 b8 ApplicationCreate(struct Game* game)
 {
     app_state.game = game;
@@ -56,8 +65,8 @@ b8 ApplicationCreate(struct Game* game)
 
     EventRegister(EVENT_CODE_APPLICATION_QUIT, 0, ApplicationOnEvent);
     EventRegister(EVENT_CODE_RESIZED, 0, ApplicationOnResize);
-    EventRegister(EVENT_CODE_KEY_PRESSED, 0, ApplicationOnKey);
-    EventRegister(EVENT_CODE_KEY_RELEASED, 0, ApplicationOnKey);
+    EventRegister(EVENT_CODE_GAMEPAD_CONNECTED, 0, ApplicationOnControllerConnect);
+    EventRegister(EVENT_CODE_GAMEPAD_DISCONNECTED, 0, ApplicationOnControllerDisconnect);
 
     PlatformInit(&app_state);
     AudioInit();
@@ -79,6 +88,7 @@ b8 ApplicationRun()
             app_state.Running = false;
         }
 
+        PlatformUpdateGamepads();
         AudioUpdate();
 
         app_state.game->Update(app_state.game);
@@ -90,10 +100,10 @@ b8 ApplicationRun()
 
     app_state.Running = false;
 
+    EventUnregister(EVENT_CODE_GAMEPAD_CONNECTED, 0, ApplicationOnControllerConnect);
+    EventUnregister(EVENT_CODE_GAMEPAD_DISCONNECTED, 0, ApplicationOnControllerDisconnect);
     EventUnregister(EVENT_CODE_RESIZED, 0, ApplicationOnResize);
     EventUnregister(EVENT_CODE_APPLICATION_QUIT, 0, ApplicationOnEvent);
-    EventUnregister(EVENT_CODE_KEY_PRESSED, 0, ApplicationOnKey);
-    EventUnregister(EVENT_CODE_KEY_RELEASED, 0, ApplicationOnKey);
 
     AudioExit();
     PlatformExit();

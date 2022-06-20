@@ -28,6 +28,11 @@ ELSA_API b8 PlatformInit(ApplicationState* application_state);
 ELSA_API void PlatformExit();
 
 /**
+ * @brief Performs any platform-specific gamepad polling.
+ */
+ELSA_API void PlatformUpdateGamepads();
+
+/**
  * @brief Performs any platform-specific message pumping that is required
  * for windowing, etc.
  * 

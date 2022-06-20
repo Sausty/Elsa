@@ -8,13 +8,26 @@
 
 #include <Windows.h>
 #include <windowsx.h>
+#include <xinput.h>
+#include <shellapi.h>
+
+typedef struct Gamepad {
+    XINPUT_STATE State;
+    b8 Connected;
+} Gamepad;
 
 typedef struct PlatformState {
     HINSTANCE hInstance;
     HWND hwnd;
 
     ApplicationState* app_state;
+    HMODULE XInputLib;
+
+    Gamepad Pads[4];
 } PlatformState;
+
+typedef DWORD (WINAPI* PFN_XINPUT_GET_STATE)(DWORD dwUserIndex, XINPUT_STATE* pState);
+PFN_XINPUT_GET_STATE XInputGetStateProc;
 
 static PlatformState platform_state;
 
@@ -24,6 +37,17 @@ b8 PlatformInit(ApplicationState* application_state)
 {
     platform_state.hInstance = GetModuleHandle(NULL);
     platform_state.app_state = application_state;
+
+    platform_state.XInputLib = LoadLibraryA("xinput1_4.dll");
+    if (!platform_state.XInputLib) {
+        ELSA_FATAL("Failed to load XInput dll!");
+        return false;
+    }
+    XInputGetStateProc = (PFN_XINPUT_GET_STATE)GetProcAddress(platform_state.XInputLib, "XInputGetState");
+    if (!XInputGetStateProc) {
+        ELSA_FATAL("Failed to load XInputGetState function!");
+        return false;
+    }
 
     HICON icon = LoadIcon(platform_state.hInstance, IDI_APPLICATION);
     
@@ -101,6 +125,51 @@ void PlatformExit()
 {
     if (platform_state.hwnd)
         DestroyWindow(platform_state.hwnd);
+
+    FreeLibrary(platform_state.XInputLib);
+}
+
+void PlatformUpdateGamepads()
+{
+    for (u16 i = 0; i < 4; i++)
+    {
+        XINPUT_STATE state;
+        ZeroMemory(&state, sizeof(XINPUT_STATE));
+
+        DWORD result = XInputGetStateProc(i, &state);
+        b8 connected = ERROR_SUCCESS == result;
+
+        if (connected != platform_state.Pads[i].Connected) {
+            Event event;
+            event.data.u16[0] = i;
+            if (connected)
+                EventFire(EVENT_CODE_GAMEPAD_CONNECTED, 0, event);
+            else
+                EventFire(EVENT_CODE_GAMEPAD_DISCONNECTED, 0, event);
+        }
+
+        platform_state.Pads[i].Connected = connected;
+
+        if (connected)
+        {
+            InputProcessGamepadButton(i, GAMEPAD_A,              (state.Gamepad.wButtons & XINPUT_GAMEPAD_A) != 0);
+            InputProcessGamepadButton(i, GAMEPAD_B,              (state.Gamepad.wButtons & XINPUT_GAMEPAD_B) != 0);
+            InputProcessGamepadButton(i, GAMEPAD_X,              (state.Gamepad.wButtons & XINPUT_GAMEPAD_X) != 0);
+            InputProcessGamepadButton(i, GAMEPAD_Y,              (state.Gamepad.wButtons & XINPUT_GAMEPAD_Y) != 0);
+            InputProcessGamepadButton(i, GAMEPAD_DPAD_UP,        (state.Gamepad.wButtons & XINPUT_GAMEPAD_DPAD_UP) != 0);
+            InputProcessGamepadButton(i, GAMEPAD_DPAD_DOWN,      (state.Gamepad.wButtons & XINPUT_GAMEPAD_DPAD_DOWN) != 0);
+            InputProcessGamepadButton(i, GAMEPAD_DPAD_LEFT,      (state.Gamepad.wButtons & XINPUT_GAMEPAD_DPAD_LEFT) != 0);
+            InputProcessGamepadButton(i, GAMEPAD_DPAD_RIGHT,     (state.Gamepad.wButtons & XINPUT_GAMEPAD_DPAD_RIGHT) != 0);
+            InputProcessGamepadButton(i, GAMEPAD_START,          (state.Gamepad.wButtons & XINPUT_GAMEPAD_START) != 0);
+            InputProcessGamepadButton(i, GAMEPAD_BACK,           (state.Gamepad.wButtons & XINPUT_GAMEPAD_BACK) != 0);
+            InputProcessGamepadButton(i, GAMEPAD_LEFT_THUMB,     (state.Gamepad.wButtons & XINPUT_GAMEPAD_LEFT_THUMB) != 0);
+            InputProcessGamepadButton(i, GAMEPAD_LEFT_SHOULDER,  (state.Gamepad.wButtons & XINPUT_GAMEPAD_LEFT_SHOULDER) != 0);
+            InputProcessGamepadButton(i, GAMEPAD_RIGHT_THUMB,    (state.Gamepad.wButtons & XINPUT_GAMEPAD_RIGHT_THUMB) != 0);
+            InputProcessGamepadButton(i, GAMEPAD_RIGHT_SHOULDER, (state.Gamepad.wButtons & XINPUT_GAMEPAD_RIGHT_SHOULDER) != 0);
+
+            platform_state.Pads[i].State = state;
+        }
+    }
 }
 
 b8 PlatformPumpMessages()

@@ -142,12 +142,38 @@ typedef enum EventCode {
      */
     EVENT_CODE_MOUSE_WHEEL = 0x07,
 
+    /** @brief Gamepad button pressed.
+     * Context usage:
+     * u16 gamepad_button = data.data.u16[0];
+     */
+    EVENT_CODE_GAMEPAD_BUTTON_PRESSED = 0x08,
+
+    /** @brief Gamepad button released.
+     * Context usage:
+     * u16 gamepad_button = data.data.u16[0];
+     */
+    EVENT_CODE_GAMEPAD_BUTTON_RELEASED = 0x09,
+
+    /**
+     * @brief Gamepad disconnected.
+     * Context usage:
+     * u16 gamepad_index = data.data.u16[0];
+     */
+    EVENT_CODE_GAMEPAD_CONNECTED = 0x10,
+    
+    /**
+     * @brief Gamepad disconnected.
+     * Context usage:
+     * u16 gamepad_index = data.data.u16[0];
+     */
+    EVENT_CODE_GAMEPAD_DISCONNECTED = 0x11,
+
     /** @brief Resized/resolution changed from the OS.
      * Context usage:
      * u16 width = data.data.u16[0];
      * u16 height = data.data.u16[1];
      */
-    EVENT_CODE_RESIZED = 0x08,
+    EVENT_CODE_RESIZED = 0x12,
 
     /** @brief The maximum event code that can be used internally. */
     MAX_EVENT_CODE = 0xFF
