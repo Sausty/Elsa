@@ -350,6 +350,9 @@ void PlatformUpdateGamepads()
             InputProcessGamepadButton(i, GAMEPAD_LEFT_SHOULDER,  profile.leftShoulder.pressed);
             InputProcessGamepadButton(i, GAMEPAD_RIGHT_THUMB,    profile.rightThumbstickButton.pressed);
             InputProcessGamepadButton(i, GAMEPAD_RIGHT_SHOULDER, profile.rightShoulder.pressed);
+
+            InputProcessGamepadTrigger(i, profile.leftTrigger.value, GAMEPAD_ANALOG_LEFT);
+            InputProcessGamepadTrigger(i, profile.rightTrigger.value, GAMEPAD_ANALOG_RIGHT);
         }
     }
 }

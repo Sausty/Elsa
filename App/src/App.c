@@ -32,6 +32,7 @@ b8 GameFree(Game* game)
 
 b8 GameUpdate(Game* game)
 {
+    
 
     return true;
 }
