@@ -11,6 +11,7 @@
 #include <Foundation/Foundation.h>
 #include <Cocoa/Cocoa.h>
 #include <QuartzCore/QuartzCore.h>
+#include <GameController/GameController.h>
 
 @class ApplicationDelegate;
 @class WindowDelegate;
@@ -31,6 +32,7 @@ typedef struct PlatformState {
 static PlatformState platform_state;
 
 Keys TranslateKeycode(u32 ns_keycode);
+u16 TranslatePlayerIndex(GCControllerPlayerIndex index);
 
 @interface WindowDelegate : NSObject <NSWindowDelegate> {
     PlatformState state;
@@ -93,10 +95,10 @@ Keys TranslateKeycode(u32 ns_keycode);
 
 @end
 
-@interface ContentView : NSView<NSTextInputClient> {
+@interface ContentView : NSView {
     NSWindow* window;
-    NSTrackingArea* trackingArea;
-    NSMutableAttributedString* markedText;
+
+    @public GCController* Controllers[4];
 }
 
 - (instancetype)initWithWindow:(NSWindow*)initWindow;
@@ -111,7 +113,34 @@ Keys TranslateKeycode(u32 ns_keycode);
         window = initWindow;
     }
 
+    [[NSNotificationCenter defaultCenter]addObserver:self selector:@selector(controllerWasConnected:)name:GCControllerDidConnectNotification object:nil];
+    [[NSNotificationCenter defaultCenter]addObserver:self selector:@selector(controllerWasDisconnected:)name:GCControllerDidDisconnectNotification object:nil];
+
     return self;
+}
+
+- (void)controllerWasConnected:(NSNotification*)notification {
+    GCController* controller = (GCController*)notification.object;
+
+    u16 playerIndex = TranslatePlayerIndex(controller.playerIndex);
+
+    Controllers[playerIndex] = controller;
+
+    Event event;
+    event.data.u16[0] = playerIndex;
+    EventFire(EVENT_CODE_GAMEPAD_CONNECTED, 0, event);
+}
+
+- (void)controllerWasDisconnected:(NSNotification*)notification {
+    GCController* controller = (GCController*)notification.object;
+
+    u16 playerIndex = TranslatePlayerIndex(controller.playerIndex);
+
+    Controllers[playerIndex] = nil;
+
+    Event event;
+    event.data.u16[0] = playerIndex;
+    EventFire(EVENT_CODE_GAMEPAD_DISCONNECTED, 0, event);
 }
 
 - (BOOL)canBecomeKeyView {
@@ -188,48 +217,6 @@ Keys TranslateKeycode(u32 ns_keycode);
 
 - (void)scrollWheel:(NSEvent*)event {
     InputProcessMouseWheel((i8)[event scrollingDeltaY]);
-}
-
-- (void)insertText:(id)string replacementRange:(NSRange)replacementRange {
-    return;
-}
-
-- (void)setMarkedText:(id)string selectedRange:(NSRange)selectedRanged replacementRange:(NSRange)replacementRange {
-    return;
-}
-
-- (void)unmarkText {
-    return;
-}
-
-static const NSRange kEmptyRange = { NSNotFound, 0 };
-
-- (NSRange)selectedRange { 
-    return kEmptyRange; 
-}
-
-- (NSRange)markedRange { 
-    return kEmptyRange; 
-}
-
-- (BOOL)hasMarkedText { 
-    return false; 
-}
-
-- (nullable NSAttributedString*)attributedSubstringForProposedRange:(NSRange)range actualRange:(nullable NSRangePointer)actualRange { 
-    return nil; 
-}
-
-- (NSArray<NSAttributedStringKey>*)validAttributesForMarkedText { 
-    return [NSArray array]; 
-}
-
-- (NSRect)firstRectForCharacterRange:(NSRange)range actualRange:(nullable NSRangePointer)actualRange { 
-    return NSMakeRect(0, 0, 0, 0); 
-}
-
-- (NSUInteger)characterIndexForPoint:(NSPoint)point { 
-    return 0; 
 }
 
 @end
@@ -342,7 +329,29 @@ void PlatformExit()
 
 void PlatformUpdateGamepads()
 {
-  
+    for (i32 i = 0; i < 4; i++)
+    {
+        if (platform_state.View->Controllers[i])
+        {
+            GCController* controller = platform_state.View->Controllers[i];
+            GCExtendedGamepad* profile = controller.extendedGamepad;
+
+            InputProcessGamepadButton(i, GAMEPAD_A,              profile.buttonA.pressed);
+            InputProcessGamepadButton(i, GAMEPAD_B,              profile.buttonB.pressed);
+            InputProcessGamepadButton(i, GAMEPAD_X,              profile.buttonX.pressed);
+            InputProcessGamepadButton(i, GAMEPAD_Y,              profile.buttonY.pressed);
+            InputProcessGamepadButton(i, GAMEPAD_DPAD_UP,        profile.dpad.up.pressed);
+            InputProcessGamepadButton(i, GAMEPAD_DPAD_DOWN,      profile.dpad.down.pressed);
+            InputProcessGamepadButton(i, GAMEPAD_DPAD_LEFT,      profile.dpad.left.pressed);
+            InputProcessGamepadButton(i, GAMEPAD_DPAD_RIGHT,     profile.dpad.right.pressed);
+            InputProcessGamepadButton(i, GAMEPAD_START,          profile.buttonMenu.pressed);
+            InputProcessGamepadButton(i, GAMEPAD_BACK,           profile.buttonOptions.pressed);
+            InputProcessGamepadButton(i, GAMEPAD_LEFT_THUMB,     profile.leftThumbstickButton.pressed);
+            InputProcessGamepadButton(i, GAMEPAD_LEFT_SHOULDER,  profile.leftShoulder.pressed);
+            InputProcessGamepadButton(i, GAMEPAD_RIGHT_THUMB,    profile.rightThumbstickButton.pressed);
+            InputProcessGamepadButton(i, GAMEPAD_RIGHT_SHOULDER, profile.rightShoulder.pressed);
+        }
+    }
 }
 
 b8 PlatformPumpMessages()
@@ -643,6 +652,25 @@ Keys TranslateKeycode(u32 ns_keycode) {
         default:
             return KEYS_MAX_KEYS;
     }
+}
+
+u16 TranslatePlayerIndex(GCControllerPlayerIndex index)
+{
+    switch (index)
+    {
+        case GCControllerPlayerIndexUnset:
+            return 0;
+        case GCControllerPlayerIndex1:
+            return 0;
+        case GCControllerPlayerIndex2:
+            return 1;
+        case GCControllerPlayerIndex3:
+            return 2;
+        case GCControllerPlayerIndex4:
+            return 3;
+    }
+
+    return 0;
 }
 
 #endif

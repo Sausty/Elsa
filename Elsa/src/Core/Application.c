@@ -41,14 +41,14 @@ b8 ApplicationOnResize(u16 code, void* sender, void* listener, Event event)
 
 b8 ApplicationOnControllerConnect(u16 code, void* sender, void* listener, Event event)
 {
-    ELSA_INFO("Controller Connected at port %i", event.data.u16[0]);
+    ELSA_INFO("Controller Connected at port %u", event.data.u16[0]);
 
     return false;
 }
 
 b8 ApplicationOnControllerDisconnect(u16 code, void* sender, void* listener, Event event)
 {
-    ELSA_INFO("Controller disconnected at port %i", event.data.u16[0]);
+    ELSA_INFO("Controller disconnected at port %u", event.data.u16[0]);
 
     return false;
 }
