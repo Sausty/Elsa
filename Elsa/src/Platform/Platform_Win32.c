@@ -238,7 +238,15 @@ void PlatformUpdateGamepads()
             InputProcessGamepadJoystick(i, rx, ry, GAMEPAD_ANALOG_RIGHT);
 
             XINPUT_VIBRATION vibration;
-            InputGetGamepadVibration(i, &vibration.wRightMotorSpeed, &vibration.wLeftMotorSpeed);
+            f32 rightSpeed;
+            f32 leftSpeed;
+            InputGetGamepadVibration(i, &rightSpeed, &leftSpeed);
+
+            u16 right = rightSpeed * 65335.0f;
+            u16 left = leftSpeed * 65335.0f;
+            vibration.wRightMotorSpeed = right;
+            vibration.wLeftMotorSpeed = left;
+
             XInputSetStateProc(i, &vibration);
 
             platform_state.Pads[i].State = state;

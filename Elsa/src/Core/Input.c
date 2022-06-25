@@ -18,7 +18,7 @@ typedef struct ControllerState {
 
     f32 Triggers[2];
     f32 Joysticks[2][2]; // [analog][x/y]
-    u16 Vibration[2];
+    f32 Vibration[2];
 } ControllerState;
 
 typedef struct InputState {
@@ -168,7 +168,7 @@ void InputGetGamepadJoystick(i32 index, GamepadAnalog analog, f32* x, f32* y)
     *y = state.GamepadCurrent[index].Joysticks[analog][1];
 }
 
-void InputSetGamepadVibration(i32 index, u16 right, u16 left)
+void InputSetGamepadVibration(i32 index, f32 right, f32 left)
 {
     state.GamepadCurrent[index].Vibration[0] = right;
     state.GamepadCurrent[index].Vibration[1] = left;
@@ -179,7 +179,7 @@ void InputResetGamepadVibration(i32 index)
     InputSetGamepadVibration(index, 0, 0);
 }
 
-void InputGetGamepadVibration(i32 index, u16* right, u16* left)
+void InputGetGamepadVibration(i32 index, f32* right, f32* left)
 {
     *right = state.GamepadCurrent[index].Vibration[0];
     *left = state.GamepadCurrent[index].Vibration[1];

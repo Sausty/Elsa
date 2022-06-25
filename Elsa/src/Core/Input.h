@@ -486,7 +486,7 @@ ELSA_API void InputGetGamepadJoystick(i32 index, GamepadAnalog analog, f32* x, f
  * @param right The speed of the right motor.
  * @param left The speed of the left motor.
  */
-ELSA_API void InputSetGamepadVibration(i32 index, u16 right, u16 left);
+ELSA_API void InputSetGamepadVibration(i32 index, f32 right, f32 left);
 
 /**
  * @brief Resets the vibration of the requested gamepad.
@@ -500,7 +500,7 @@ ELSA_API void InputResetGamepadVibration(i32 index);
  * @param right A pointer to hold the right motor value.
  * @param left A pointer to hold the left motor value.
  */
-ELSA_API void InputGetGamepadVibration(i32 index, u16* right, u16* left);
+ELSA_API void InputGetGamepadVibration(i32 index, f32* right, f32* left);
 
 /**
  * @brief Sets the press state of the given gamepad button.

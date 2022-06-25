@@ -32,7 +32,10 @@ b8 GameFree(Game* game)
 
 b8 GameUpdate(Game* game)
 {
-    
+    if (InputIsGamepadButtonPressed(0, GAMEPAD_A))
+        InputSetGamepadVibration(0, 1.0f, 1.0f);
+    else
+        InputResetGamepadVibration(0);
 
     return true;
 }
