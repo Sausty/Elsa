@@ -19,6 +19,7 @@ typedef struct ControllerState {
     f32 Triggers[2];
     f32 Joysticks[2][2]; // [analog][x/y]
     f32 Vibration[2];
+    f32 BatteryLevel;
 } ControllerState;
 
 typedef struct InputState {
@@ -192,6 +193,16 @@ void InputProcessGamepadButton(i32 index, GamepadButtons button, b8 pressed)
     Event event;
     event.data.u16[0] = button;
     EventFire(pressed ? EVENT_CODE_GAMEPAD_BUTTON_PRESSED : EVENT_CODE_GAMEPAD_BUTTON_RELEASED, 0, event);
+}
+
+void InputProcessGamepadBattery(i32 index, f32 value)
+{
+    state.GamepadCurrent[index].BatteryLevel = value;
+}
+
+f32 InputGetGamepadBattery(i32 index)
+{
+    return state.GamepadCurrent[index].BatteryLevel;
 }
 
 void InputProcessGamepadTrigger(i32 index, f32 value, GamepadAnalog analog)

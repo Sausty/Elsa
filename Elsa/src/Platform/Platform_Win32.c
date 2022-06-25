@@ -29,13 +29,16 @@ typedef struct PlatformState {
 
 typedef DWORD (WINAPI* PFN_XINPUT_GET_STATE)(DWORD dwUserIndex, XINPUT_STATE* pState);
 typedef DWORD (WINAPI* PFN_XINPUT_SET_STATE)(DWORD dwUserIndex, XINPUT_VIBRATION* pVibration);
+typedef DWORD (WINAPI* PFN_XINPUT_GET_BATTERY_INFORMATION)(DWORD dwUserIndex, BYTE devType, XINPUT_BATTERY_INFORMATION* pBatteryInformation);
 
 PFN_XINPUT_GET_STATE XInputGetStateProc;
 PFN_XINPUT_SET_STATE XInputSetStateProc;
+PFN_XINPUT_GET_BATTERY_INFORMATION XInputGetBatteryInformationProc;
 
 static PlatformState platform_state;
 
 LRESULT CALLBACK PlatformProcessMessages(HWND hwnd, u32 msg, WPARAM w_param, LPARAM l_param);
+f32 XInputBatteryToFloat(BYTE battery_level);
 
 f32 Normalize(f32 input, f32 min, f32 max)
 {
@@ -80,6 +83,11 @@ b8 PlatformInit(ApplicationState* application_state)
     XInputSetStateProc = (PFN_XINPUT_SET_STATE)GetProcAddress(platform_state.XInputLib, "XInputSetState");
     if (!XInputSetStateProc) {
         ELSA_FATAL("Failed to load XInputSetState function!");
+        return false;
+    }
+    XInputGetBatteryInformationProc = (PFN_XINPUT_GET_BATTERY_INFORMATION)GetProcAddress(platform_state.XInputLib, "XInputGetBatteryInformation");
+    if (!XInputGetBatteryInformationProc) {
+        ELSA_FATAL("Failed to load the XInputGetBatteryInformation function!");
         return false;
     }
 
@@ -186,6 +194,12 @@ void PlatformUpdateGamepads()
 
         if (connected)
         {
+            XINPUT_BATTERY_INFORMATION battery;
+            PlatformZeroMemory(&battery, sizeof(battery));
+            XInputGetBatteryInformationProc(i, BATTERY_DEVTYPE_GAMEPAD, &battery);
+
+            InputProcessGamepadBattery(i, XInputBatteryToFloat(battery.BatteryLevel));
+
             InputProcessGamepadButton(i, GAMEPAD_A,              (state.Gamepad.wButtons & XINPUT_GAMEPAD_A) != 0);
             InputProcessGamepadButton(i, GAMEPAD_B,              (state.Gamepad.wButtons & XINPUT_GAMEPAD_B) != 0);
             InputProcessGamepadButton(i, GAMEPAD_X,              (state.Gamepad.wButtons & XINPUT_GAMEPAD_X) != 0);
@@ -414,6 +428,20 @@ LRESULT CALLBACK PlatformProcessMessages(HWND hwnd, u32 msg, WPARAM w_param, LPA
     }
 
     return DefWindowProcA(hwnd, msg, w_param, l_param);
+}
+
+f32 XInputBatteryToFloat(BYTE battery_level)
+{
+    if (battery_level == BATTERY_LEVEL_EMPTY)
+        return 0.0f;
+    if (battery_level == BATTERY_LEVEL_LOW)
+        return 0.25f;
+    if (battery_level == BATTERY_LEVEL_MEDIUM) 
+        return 0.50f;
+    if (battery_level == BATTERY_LEVEL_FULL)   
+        return 1.0f;
+    
+    return 0.0f;
 }
 
 #endif

@@ -511,6 +511,20 @@ ELSA_API void InputGetGamepadVibration(i32 index, f32* right, f32* left);
 ELSA_API void InputProcessGamepadButton(i32 index, GamepadButtons button, b8 pressed);
 
 /**
+ * @brief Sets the battery information of the given gamepad.
+ * @param index The gamepad index whose state to set.
+ * @param value The battery value.
+ */
+ELSA_API void InputProcessGamepadBattery(i32 index, f32 value);
+
+/**
+ * @brief Gets the battery level of the given gamepad.
+ * @param index The index of the gamepad.
+ * @returns The battery level of the gamepad.
+ */
+ELSA_API f32 InputGetGamepadBattery(i32 index);
+
+/**
  * @brief Sets the analog value of the given trigger.
  * @param index The gamepad index whose state to set.
  * @param value The analog value to set.
