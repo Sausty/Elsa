@@ -2,3 +2,7 @@
 
 bin
 docs
+
+# Stuff
+
+.DS_Store

@@ -101,6 +101,7 @@ typedef struct HapticMotor {
     CHHapticEventParameter* HapticEventParameter;
     CHHapticEvent* HapticEvent;
     CHHapticPattern* HapticPattern;
+
     id<CHHapticPatternPlayer> PatternPlayer;
 } HapticMotor;
 
@@ -118,7 +119,6 @@ typedef struct GamepadHandle {
 }
 
 - (instancetype)initWithWindow:(NSWindow*)initWindow;
-- (void)updateHaptics:(float)left rightSpeed:(float)right controllerIndex:(int)index;
 
 @end
 
@@ -149,7 +149,9 @@ typedef struct GamepadHandle {
 
     NSError* error;
     [Controllers[playerIndex].LeftMotor.Engine startAndReturnError:&error];
+    if (error) NSLog(@"Failed to start left haptic engine: %@", error);
     [Controllers[playerIndex].RightMotor.Engine startAndReturnError:&error];
+    if (error) NSLog(@"Failed to start right haptic engine: %@", error);
 
     Controllers[playerIndex].LeftMotor.HapticEventParameter = [[CHHapticEventParameter alloc] initWithParameterID:CHHapticEventParameterIDHapticIntensity value:0.0];
     Controllers[playerIndex].RightMotor.HapticEventParameter = [[CHHapticEventParameter alloc] initWithParameterID:CHHapticEventParameterIDHapticIntensity value:0.0];
@@ -158,13 +160,19 @@ typedef struct GamepadHandle {
     Controllers[playerIndex].RightMotor.HapticEvent = [[CHHapticEvent alloc] initWithEventType:CHHapticEventTypeHapticContinuous parameters:@[Controllers[playerIndex].RightMotor.HapticEventParameter] relativeTime:0 duration:GCHapticDurationInfinite];
 
     Controllers[playerIndex].LeftMotor.HapticPattern = [[CHHapticPattern alloc] initWithEvents:@[Controllers[playerIndex].LeftMotor.HapticEvent] parameters:@[] error:&error];
+    if (error) NSLog(@"Failed to init left haptic pattern: %@", error);
     Controllers[playerIndex].RightMotor.HapticPattern = [[CHHapticPattern alloc] initWithEvents:@[Controllers[playerIndex].RightMotor.HapticEvent] parameters:@[] error:&error];
+    if (error) NSLog(@"Failed to init right haptic pattern: %@", error);
 
     Controllers[playerIndex].LeftMotor.PatternPlayer = [Controllers[playerIndex].LeftMotor.Engine createPlayerWithPattern:Controllers[playerIndex].LeftMotor.HapticPattern error:&error];
+    if (error) NSLog(@"Failed to init left haptic pattern player: %@", error);
     Controllers[playerIndex].RightMotor.PatternPlayer = [Controllers[playerIndex].RightMotor.Engine createPlayerWithPattern:Controllers[playerIndex].RightMotor.HapticPattern error:&error];
+    if (error) NSLog(@"Failed to init right haptic pattern player: %@", error);
 
     [Controllers[playerIndex].LeftMotor.PatternPlayer startAtTime:CHHapticTimeImmediate error:&error];
+    if (error) NSLog(@"Failed to start left haptic pattern player: %@", error);
     [Controllers[playerIndex].RightMotor.PatternPlayer startAtTime:CHHapticTimeImmediate error:&error];
+    if (error) NSLog(@"Failed to start right haptic pattern player: %@", error);
 
     Event event;
     event.data.u16[0] = playerIndex;
@@ -192,25 +200,6 @@ typedef struct GamepadHandle {
     Event event;
     event.data.u16[0] = playerIndex;
     EventFire(EVENT_CODE_GAMEPAD_DISCONNECTED, 0, event);
-}
-
-- (void)updateHaptics:(f32)left rightSpeed:(f32)right controllerIndex:(i32)index {
-    if (Controllers[index].LeftMotor.Engine && Controllers[index].RightMotor.Engine) {
-        NSError* error;
-        CHHapticDynamicParameter* left_parameter = [[CHHapticDynamicParameter alloc] initWithParameterID:CHHapticDynamicParameterIDHapticIntensityControl value:left relativeTime:0];
-        CHHapticDynamicParameter* right_parameter = [[CHHapticDynamicParameter alloc] initWithParameterID:CHHapticDynamicParameterIDHapticIntensityControl value:right relativeTime:0];
-
-        id<CHHapticPatternPlayer> LeftPlayer = Controllers[index].LeftMotor.PatternPlayer;
-        id<CHHapticPatternPlayer> RightPlayer = Controllers[index].RightMotor.PatternPlayer;
-
-        //if (LeftPlayer && left_parameter)
-        //    [LeftPlayer sendParameters:@[left_parameter] atTime:CHHapticTimeImmediate error:&error];
-        //if (RightPlayer && right_parameter)
-        //    [RightPlayer sendParameters:@[right_parameter] atTime:CHHapticTimeImmediate error:&error];
-
-        [left_parameter release];
-        [right_parameter release];
-    }
 }
 
 - (BOOL)canBecomeKeyView {
@@ -406,6 +395,9 @@ void PlatformUpdateGamepads()
             GCController* controller = platform_state.View->Controllers[i].Controller;
             GCExtendedGamepad* profile = controller.extendedGamepad;
 
+            if (controller.battery)
+                InputProcessGamepadBattery(i, controller.battery.batteryLevel);
+
             InputProcessGamepadButton(i, GAMEPAD_A,              profile.buttonA.pressed);
             InputProcessGamepadButton(i, GAMEPAD_B,              profile.buttonB.pressed);
             InputProcessGamepadButton(i, GAMEPAD_X,              profile.buttonX.pressed);
@@ -437,7 +429,17 @@ void PlatformUpdateGamepads()
 
                 InputGetGamepadVibration(i, &left, &right);
 
-                [platform_state.View updateHaptics:left rightSpeed:right controllerIndex:i];           
+                if (0)
+                {
+                    CHHapticDynamicParameter* left_parameter = [[CHHapticDynamicParameter alloc] initWithParameterID:CHHapticDynamicParameterIDHapticIntensityControl value:left relativeTime:0];
+                    CHHapticDynamicParameter* right_parameter = [[CHHapticDynamicParameter alloc] initWithParameterID:CHHapticDynamicParameterIDHapticIntensityControl value:right relativeTime:0];
+    
+                    [platform_state.View->Controllers[i].LeftMotor.PatternPlayer sendParameters:@[left_parameter] atTime:CHHapticTimeImmediate error:nil];
+                    [platform_state.View->Controllers[i].RightMotor.PatternPlayer sendParameters:@[right_parameter] atTime:CHHapticTimeImmediate error:nil];          
+                
+                    [left_parameter release];
+                    [right_parameter release];
+                }
             }
         }
     }
