@@ -1,5 +1,5 @@
 /**
- * @file Application.h
+ * @file Input.h
  * @author Milo Heinrich (MikuoH15TH@gmail.com)
  * @brief This file contains everything having to do with input on deskop
  * environments from keyboards and mice. Gamepads and touch controls will
