@@ -184,17 +184,6 @@ typedef struct GamepadHandle {
 
     u16 playerIndex = TranslatePlayerIndex(controller.playerIndex);
 
-    [Controllers[playerIndex].LeftMotor.HapticPattern release];
-    [Controllers[playerIndex].RightMotor.HapticPattern release];
-
-    [Controllers[playerIndex].LeftMotor.HapticEvent release];
-    [Controllers[playerIndex].RightMotor.HapticEvent release];
-
-    [Controllers[playerIndex].LeftMotor.HapticEventParameter release];
-    [Controllers[playerIndex].RightMotor.HapticEventParameter release];
-
-    [Controllers[playerIndex].LeftMotor.Engine release];
-    [Controllers[playerIndex].RightMotor.Engine release];
     Controllers[playerIndex].Controller = nil;
 
     Event event;
@@ -433,10 +422,10 @@ void PlatformUpdateGamepads()
                 {
                     CHHapticDynamicParameter* left_parameter = [[CHHapticDynamicParameter alloc] initWithParameterID:CHHapticDynamicParameterIDHapticIntensityControl value:left relativeTime:0];
                     CHHapticDynamicParameter* right_parameter = [[CHHapticDynamicParameter alloc] initWithParameterID:CHHapticDynamicParameterIDHapticIntensityControl value:right relativeTime:0];
-    
+
                     [platform_state.View->Controllers[i].LeftMotor.PatternPlayer sendParameters:@[left_parameter] atTime:CHHapticTimeImmediate error:nil];
                     [platform_state.View->Controllers[i].RightMotor.PatternPlayer sendParameters:@[right_parameter] atTime:CHHapticTimeImmediate error:nil];          
-                
+
                     [left_parameter release];
                     [right_parameter release];
                 }
