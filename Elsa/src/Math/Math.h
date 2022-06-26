@@ -879,4 +879,407 @@ ELSA_INLINE f32 V4Distance(v4f left, v4f right) {
 	return V4Length(d);
 }
 
+// ------------------------------------------
+// SSE Stuff
+// ------------------------------------------
+#ifdef ELSA_USE_SSE
+ELSA_INLINE __m128 LinearCombineSSE(__m128 left, m4f right) {
+	__m128 result;
+    result = _mm_mul_ps(_mm_shuffle_ps(left, left, 0x00), right.Columns[0]);
+    result = _mm_add_ps(result, _mm_mul_ps(_mm_shuffle_ps(left, left, 0x55), right.Columns[1]));
+    result = _mm_add_ps(result, _mm_mul_ps(_mm_shuffle_ps(left, left, 0xaa), right.Columns[2]));
+    result = _mm_add_ps(result, _mm_mul_ps(_mm_shuffle_ps(left, left, 0xff), right.Columns[3]));
+	return result;
+}
+#endif
+
+// ------------------------------------------
+// 4x4 Matrix
+// ------------------------------------------
+
+/**
+ * @brief Creates and returns an identity matrix
+ * @return A new identity matrix 
+ */
+ELSA_INLINE m4f M4Identity() {
+	m4f result;
+	f32 Diagonal = 1.0f;
+	
+	result.Elements[0][0] = Diagonal;
+    result.Elements[1][1] = Diagonal;
+    result.Elements[2][2] = Diagonal;
+    result.Elements[3][3] = Diagonal;
+	
+	return result;
+}
+
+/**
+ * @brief Creates and returns an identity matrix with the given scalar
+* @param diagonal The diagonal
+*
+ * @return A new identity matrix 
+ */
+ELSA_INLINE m4f M4Diagonal(f32 diagonal) {
+	m4f result;
+	
+	result.Elements[0][0] = diagonal;
+    result.Elements[1][1] = diagonal;
+    result.Elements[2][2] = diagonal;
+    result.Elements[3][3] = diagonal;
+	
+	return result;
+}
+
+/**
+* @brief Transposes the given matrix.
+* @param matrix The matrix to tranpose
+*
+* @returns The transposed matrix.
+*/
+ELSA_INLINE m4f M4Transpose(m4f matrix) {
+	m4f result = matrix;
+	
+#ifdef ELSA_USE_SSE
+	_MM_TRANSPOSE4_PS(result.Columns[0], result.Columns[1], result.Columns[2], result.Columns[3]);
+#else
+	for (i32 i = 0; i < 4; i++)
+	{
+		for (i32 j = 0; j < 4; j++)
+		{
+			result.Elements[j][i] = matrix.Elements[i][j];
+		}
+	}
+#endif
+	
+	return result;
+}
+
+/**
+* @brief Adds left and right.
+* @param left The left matrix.
+* @param right The right matrix.
+
+* @returns The result matrix.
+*/
+ELSA_INLINE m4f M4Add(m4f left, m4f right) {
+	m4f result;
+	
+#ifdef ELSA_USE_SSE
+	result.Columns[0] = _mm_add_ps(left.Columns[0], right.Columns[0]);
+    result.Columns[1] = _mm_add_ps(left.Columns[1], right.Columns[1]);
+    result.Columns[2] = _mm_add_ps(left.Columns[2], right.Columns[2]);
+    result.Columns[3] = _mm_add_ps(left.Columns[3], right.Columns[3]);
+#else
+	for (i32 i = 0; i < 4; i++)
+	{
+		for (i32 j = 0; j < 4; j++)
+		{
+			result.Elements[i][j] = left.Elements[i][j] + right.Elements[i][j];
+		}
+	}
+#endif
+	
+	return result;
+}
+
+/**
+* @brief Substracts left and right.
+* @param left The left matrix.
+* @param right The right matrix.
+
+* @returns The result matrix.
+*/
+ELSA_INLINE m4f M4Sub(m4f left, m4f right) {
+	m4f result;
+	
+#ifdef ELSA_USE_SSE
+	result.Columns[0] = _mm_sub_ps(left.Columns[0], right.Columns[0]);
+    result.Columns[1] = _mm_sub_ps(left.Columns[1], right.Columns[1]);
+    result.Columns[2] = _mm_sub_ps(left.Columns[2], right.Columns[2]);
+    result.Columns[3] = _mm_sub_ps(left.Columns[3], right.Columns[3]);
+#else
+	for (i32 i = 0; i < 4; i++)
+	{
+		for (i32 j = 0; j < 4; j++)
+		{
+			result.Elements[i][j] = left.Elements[i][j] - right.Elements[i][j];
+		}
+	}
+#endif
+	
+	return result;
+}
+
+/**
+* @brief Multiplies left and right.
+* @param left The left matrix.
+* @param right The right matrix.
+
+* @returns The result matrix.
+*/
+ELSA_INLINE m4f M4Mul(m4f left, m4f right) {
+	m4f result;
+	
+#ifdef ELSA_USE_SSE
+	result.Columns[0] = LinearCombineSSE(right.Columns[0], left);
+    result.Columns[1] = LinearCombineSSE(right.Columns[1], left);
+    result.Columns[2] = LinearCombineSSE(right.Columns[2], left);
+    result.Columns[3] = LinearCombineSSE(right.Columns[3], left);
+#else
+	for (i32 i = 0; i < 4; i++)
+	{
+		for (i32 j = 0; j < 4; j++)
+		{
+			f32 sum = 0.0f;
+			for (i32 e = 0; e < 4; e++)
+			{
+				sum += left.Elements[e][j] * right.Elements[i][e];
+			}
+			
+			result.Elements[i][j] = sum;
+		}
+	}
+#endif
+	
+	return result;
+}
+
+/**
+* @brief Multiplies left and scalar.
+* @param left The left matrix.
+* @param scalar The scalar value.
+
+* @returns The result matrix.
+*/
+ELSA_INLINE m4f M4MulScalar(m4f left, f32 scalar) {
+	m4f result;
+	
+#ifdef ELSA_USE_SSE
+	__m128 SSEScalar = _mm_set1_ps(scalar);
+    result.Columns[0] = _mm_mul_ps(left.Columns[0], SSEScalar);
+    result.Columns[1] = _mm_mul_ps(left.Columns[1], SSEScalar);
+    result.Columns[2] = _mm_mul_ps(left.Columns[2], SSEScalar);
+    result.Columns[3] = _mm_mul_ps(left.Columns[3], SSEScalar);
+#else
+	for (i32 i = 0; i < 4; i++)
+	{
+		for (i32 j = 0; j < 4; j++)
+		{
+			result.Elements[i][j] = left.Elements[i][j] * scalar;
+		}
+	}
+#endif
+	
+	return result;
+}
+
+/**
+* @brief Multiplies left and vector.
+* @param left The left matrix.
+* @param vector The right vector.
+*
+* @returns The result vector.
+*/
+ELSA_INLINE v4f M4MulV4(m4f left, v4f vector) {
+	v4f result;
+	
+#ifdef ELSA_USE_SSE
+	result.InternalElementsSSE = LinearCombineSSE(vector.InternalElementsSSE, left);
+#else
+	i32 Columns, Rows;
+    for(Rows = 0; Rows < 4; ++Rows)
+    {
+        f32 Sum = 0;
+        for(Columns = 0; Columns < 4; ++Columns)
+        {
+            Sum += left.Elements[Columns][Rows] * vector.Elements[Columns];
+        }
+		
+        result.Elements[Rows] = Sum;
+    }
+#endif
+	
+	return result;
+}
+
+/**
+* @brief Divides left and scalar.
+* @param left The left matrix.
+* @param scalar The scalar value.
+
+* @returns The result matrix.
+*/
+ELSA_INLINE m4f M4DivScalar(m4f left, f32 scalar) {
+	m4f result;
+	
+#ifdef ELSA_USE_SSE
+	__m128 SSEScalar = _mm_set1_ps(scalar);
+    result.Columns[0] = _mm_div_ps(left.Columns[0], SSEScalar);
+    result.Columns[1] = _mm_div_ps(left.Columns[1], SSEScalar);
+    result.Columns[2] = _mm_div_ps(left.Columns[2], SSEScalar);
+    result.Columns[3] = _mm_div_ps(left.Columns[3], SSEScalar);
+#else
+	for (i32 i = 0; i < 4; i++)
+	{
+		for (i32 j = 0; j < 4; j++)
+		{
+			result.Elements[i][j] = left.Elements[i][j] / scalar;
+		}
+	}
+#endif
+	
+	return result;
+}
+
+/**
+ * @brief Creates and returns an orthographic projection matrix. Typically used to
+ * render flat or 2D scenes.
+ * 
+ * @param left The left side of the view frustum.
+ * @param right The right side of the view frustum.
+ * @param bottom The bottom side of the view frustum.
+ * @param top The top side of the view frustum.
+ * @param near The near clipping plane distance.
+ * @param far The far clipping plane distance.
+*
+ * @returns A new orthographic projection matrix. 
+ */
+ELSA_INLINE m4f M4Orthographic(f32 left, f32 right, f32 bottom, f32 top, f32 near, f32 far) {
+	m4f result = M4Identity();
+	
+	result.Elements[0][0] = 2.0f / (right - left);
+    result.Elements[1][1] = 2.0f / (top - bottom);
+    result.Elements[2][2] = 2.0f / (near - far);
+    result.Elements[3][3] = 1.0f;
+	
+    result.Elements[3][0] = (left + right) / (left - right);
+    result.Elements[3][1] = (bottom + top) / (bottom - top);
+    result.Elements[3][2] = (far + near) / (near - far);
+	
+	return result;
+}
+
+/**
+ * @brief Creates and returns a perspective matrix. Typically used to render 3d scenes.
+ * 
+ * @param fov_radians The field of view in radians.
+ * @param aspect_ratio The aspect ratio.
+ * @param near The near clipping plane distance.
+ * @param far The far clipping plane distance.
+*
+ * @returns A new perspective matrix. 
+ */
+ELSA_INLINE m4f M4Perspective(f32 fov_radians, f32 aspect_ratio, f32 near, f32 far) {
+	m4f result = M4Identity();
+	
+	f32 Cotangent = 1.0f / Tan(fov_radians);
+	
+    result.Elements[0][0] = Cotangent / aspect_ratio;
+    result.Elements[1][1] = Cotangent;
+    result.Elements[2][3] = -1.0f;
+    result.Elements[2][2] = (near + far) / (near - far);
+    result.Elements[3][2] = (2.0f * near * far) / (near - far);
+    result.Elements[3][3] = 0.0f;
+	
+	return result;
+}
+
+/**
+ * @brief Creates and returns a look-at matrix, or a matrix looking 
+ * at target from the perspective of position.
+ * 
+ * @param position The position of the matrix.
+ * @param target The position to "look at".
+ * @param up The up vector.
+ * @return A matrix looking at target from the perspective of position. 
+ */
+ELSA_INLINE m4f M4LookAt(v3f eye, v3f center, v3f up) {
+	m4f result = M4Identity();
+	
+	v3f F = V3Normalized(V3Sub(center, eye));
+	v3f S = V3Normalized(V3Cross(F, up));
+	v3f U = V3Cross(S, F);
+	
+    result.Elements[0][0] = S.x;
+    result.Elements[0][1] = U.x;
+    result.Elements[0][2] = -F.x;
+    result.Elements[0][3] = 0.0f;
+	
+    result.Elements[1][0] = S.y;
+    result.Elements[1][1] = U.y;
+    result.Elements[1][2] = -F.y;
+    result.Elements[1][3] = 0.0f;
+	
+    result.Elements[2][0] = S.z;
+    result.Elements[2][1] = U.z;
+    result.Elements[2][2] = -F.z;
+    result.Elements[2][3] = 0.0f;
+	
+    result.Elements[3][0] = -V3Dot(S, eye);
+    result.Elements[3][1] = -V3Dot(U, eye);
+    result.Elements[3][2] = V3Dot(F, eye);
+    result.Elements[3][3] = 1.0f;
+	
+	return result;
+}
+
+/**
+ * @brief Creates and returns a translation matrix from the given position.
+ * 
+ * @param position The position to be used to create the matrix.
+ * @return A newly created translation matrix.
+ */
+ELSA_API m4f M4Translate(v3f position) {
+	m4f result = M4Identity();
+	result.Elements[3][0] = position.x;
+    result.Elements[3][1] = position.y;
+    result.Elements[3][2] = position.z;
+	return result;
+}
+
+/**
+ * @brief Returns a scale matrix using the provided scale.
+ * 
+ * @param scale The 3-component scale.
+ * @return A scale matrix.
+ */
+ELSA_API m4f M4Scale(v3f scale) {
+	m4f result = M4Identity();
+	result.Elements[0][0] = scale.x;
+    result.Elements[1][1] = scale.y;
+    result.Elements[2][2] = scale.z;
+	return result;
+}
+
+/**
+ * @brief Creates a rotation matrix from the provided angle and axis.
+ * 
+ * @param angle The rotation angle in degrees.
+* @param axis The rotation axis.
+ * @return A rotation matrix.
+ */
+ELSA_API m4f M4Rotate(f32 angle, v3f axis) {
+	m4f result = M4Identity();
+	
+	axis = V3Normalized(axis);
+	
+    f32 SinTheta = Sin(angle * (E_PI / 180.0f));
+    f32 CosTheta = Cos(angle * (E_PI / 180.0f));
+    f32 CosValue = 1.0f - CosTheta;
+	
+    result.Elements[0][0] = (axis.x * axis.x * CosValue) + CosTheta;
+    result.Elements[0][1] = (axis.x * axis.y * CosValue) + (axis.z * SinTheta);
+    result.Elements[0][2] = (axis.x * axis.z * CosValue) - (axis.y * SinTheta);
+	
+    result.Elements[1][0] = (axis.y * axis.x * CosValue) - (axis.z * SinTheta);
+    result.Elements[1][1] = (axis.y * axis.y * CosValue) + CosTheta;
+    result.Elements[1][2] = (axis.y * axis.z * CosValue) + (axis.x * SinTheta);
+	
+    result.Elements[2][0] = (axis.z * axis.x * CosValue) + (axis.y * SinTheta);
+    result.Elements[2][1] = (axis.z * axis.y * CosValue) - (axis.x * SinTheta);
+    result.Elements[2][2] = (axis.z * axis.z * CosValue) + CosTheta;
+	
+	return result;
+}
+
 #endif

@@ -143,7 +143,7 @@ typedef v4f q4f;
 /** @brief a floating point 4x4 matrix, typically used to represent object transformations. Column-major. */
 typedef union m4f {
 	/** @brief The matrix elements */
-	f32 Data[4][4];
+	f32 Elements[4][4];
 	
 #ifdef ELSA_USE_SSE
 	__m128 Columns[4];
