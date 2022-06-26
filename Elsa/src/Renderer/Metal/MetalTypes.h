@@ -1,5 +1,5 @@
 /**
- * @file RendererBackend.h
+ * @file MetalTypes.h
  * @author Milo Heinrich (MikuoH15TH@gmail.com)
  * @brief This file contains type definitions for the Metal backend.
  * @version 1.0

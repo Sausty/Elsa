@@ -3,6 +3,7 @@
 #include "Core/Logger.h"
 #include "Core/Event.h"
 #include "Core/Input.h"
+#include "Containers/Darray.h"
 
 #if defined(ELSA_PLATFORM_WINDOWS)
 
@@ -11,6 +12,10 @@
 #include <xinput.h>
 #include <shellapi.h>
 #include <math.h>
+
+#include <vulkan/vulkan.h>
+#include <vulkan/vulkan_win32.h>
+#include <Renderer/Vulkan/VulkanTypes.h>
 
 typedef struct Gamepad {
     XINPUT_STATE State;
@@ -447,6 +452,26 @@ f32 XInputBatteryToFloat(BYTE battery_level)
 void* PlatformGetWindowView()
 {
     return platform_state.hwnd;
+}
+
+void PlatformGetRequiredExtensionNames(const char*** names_darray)
+{
+    Darray_Push(*names_darray, &"VK_KHR_win32_surface");
+}
+
+b8 PlatformCreateVulkanSurface(struct VulkanContext* context)
+{
+    VkWin32SurfaceCreateInfoKHR create_info = {VK_STRUCTURE_TYPE_WIN32_SURFACE_CREATE_INFO_KHR};
+    create_info.hinstance = platform_state.hInstance;
+    create_info.hwnd = platform_state.hwnd;
+
+    VkResult result = vkCreateWin32SurfaceKHR(context->Instance, &create_info, NULL, &context->Surface);
+    if (result != VK_SUCCESS) {
+        ELSA_FATAL("Vulkan surface creation failed.");
+        return false;
+    }
+
+    return true;
 }
 
 #endif

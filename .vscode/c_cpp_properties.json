@@ -5,7 +5,8 @@
             "includePath": [
                 "${default}",
                 "${workspaceFolder}/Elsa/src",
-                "${workspaceFolder}/Elsa/Vendor"
+                "${workspaceFolder}/Elsa/Vendor",
+                "${VULKAN_SDK}/include"
             ],
             "defines": [
                 "_DEBUG",

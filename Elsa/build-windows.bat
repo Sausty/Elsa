@@ -10,8 +10,8 @@ FOR /R %%f in (*.c) do (
 
 SET Assembly=Elsa
 SET CompilerFlags=-g -shared -Wvarargs -Wall -Werror
-SET IncludeFlags=-Isrc -Ivendor
-SET LinkerFlags=-luser32 -lgdi32 -lkernel32
+SET IncludeFlags=-Isrc -Ivendor -I%VULKAN_SDK%/Include
+SET LinkerFlags=-luser32 -lgdi32 -lkernel32 -lvulkan-1 -L%VULKAN_SDK%/Lib
 SET Defines=-D_DEBUG -DELSA_EXPORT -D_CRT_SECURE_NO_WARNINGS
 
 ECHO "Building %Assembly%..."

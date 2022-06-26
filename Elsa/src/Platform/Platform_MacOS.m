@@ -759,4 +759,14 @@ void* PlatformGetWindowView()
     return platform_state.Layer;
 }
 
+void PlatformGetRequiredExtensionNames(const char*** names_darray)
+{
+    return;
+}
+
+b8 PlatformCreateVulkanSurface(struct vulkan_context* context)
+{
+    return true;
+}
+
 #endif

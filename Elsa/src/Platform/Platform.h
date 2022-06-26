@@ -14,6 +14,8 @@
 #include <Defines.h>
 #include <ApplicationTypes.h>
 
+struct VulkanContext;
+
 /**
  * @brief Performs startup routines within the platform layer. 
  * 
@@ -113,5 +115,21 @@ ELSA_API void PlatformConsoleWriteError(const char* message, u8 colour);
  * @returns The pointer of the window view.
  */
 ELSA_API void* PlatformGetWindowView();
+
+/**
+ * @brief Appends the names of required extensions for this platform to
+ * the names_darray, which should be created and passed in.
+ * @param names_darray A pointer to the array names of required extension names. Must be a darray
+ * as this function adds names to the array.
+ */
+ELSA_API void PlatformGetRequiredExtensionNames(const char*** names_darray);
+
+/**
+ * @brief Creates and assigns a surface to the given context.
+ * 
+ * @param context A pointer to the Vulkan context.
+ * @returns True on success; otherwise false.
+ */
+ELSA_API b8 PlatformCreateVulkanSurface(struct VulkanContext* context);
 
 #endif
