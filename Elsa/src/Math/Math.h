@@ -328,4 +328,274 @@ ELSA_INLINE f32 V2Distance(v2f left, v2f right) {
 	return V2Length(d);
 }
 
+// ------------------------------------------
+// Vector 3
+// ------------------------------------------
+
+/**
+ * @brief Creates and returns a 3-component vector with all components set to 0.0f.
+ */
+ELSA_INLINE v3f V3Zero() {
+	return (v3f){{0.0f, 0.0f, 0.0f}};
+}
+
+/**
+ * @brief Creates and returns a 3-component vector with all components set to 1.0f.
+ */
+ELSA_INLINE v3f V3One() {
+	return (v3f){{1.0f, 1.0f, 1.0f}};
+}
+
+/**
+* @brief Creates and returns a 3-component vector with all components set to the given value.
+* @param scalar The value to set.
+*/
+ELSA_INLINE v3f V3Scalar(f32 scalar) {
+	return (v3f){{scalar, scalar, scalar}};
+}
+
+/**
+* @brief Creates and returns a 3-component vector with its components set to the given values.
+* @param x The x value of the vector.
+* @param y The y value of the vector.
+* @param z The z value of the vector.
+* @returns A new vec3
+*/
+ELSA_INLINE v3f V3Create(f32 x, f32 y, f32 z) {
+	return (v3f){{x, y, z}};
+}
+
+/**
+ * @brief Returns a new vec3 containing the x, y and z components of the 
+ * supplied vec4, essentially dropping the w component.
+ * 
+ * @param vector The 4-component vector to extract from.
+ * @returns A new vec3 
+ */
+ELSA_INLINE v3f V3FromV4(v4f vector) {
+    return (v3f){{vector.x, vector.y, vector.z}};
+}
+
+/**
+ * @brief Returns a new vec4 using vector as the x, y and z components and w for w.
+ * 
+ * @param vector The 3-component vector.
+ * @param w The w component.
+ * @returns A new vec4 
+ */
+ELSA_INLINE v4f V3ToV4(v3f vector, f32 w) {
+    return (v4f){{vector.x, vector.y, vector.z, w}};
+}
+
+/**
+ * @brief Creates and returns a 3-component vector pointing up (0, 1, 0).
+ */
+ELSA_INLINE v3f V3Up() {
+    return (v3f){{0.0f, 1.0f, 0.0f}};
+}
+
+/**
+ * @brief Creates and returns a 3-component vector pointing down (0, -1, 0).
+ */
+ELSA_INLINE v3f V3Down() {
+    return (v3f){{0.0f, -1.0f, 0.0f}};
+}
+
+/**
+ * @brief Creates and returns a 3-component vector pointing left (-1, 0, 0).
+ */
+ELSA_INLINE v3f V3Left() {
+	return (v3f){{-1.0f, 0.0f, 0.0f}};
+}
+
+/**
+ * @brief Creates and returns a 3-component vector pointing right (1, 0, 0).
+ */
+ELSA_INLINE v3f V3Right() {
+	return (v3f){{1.0f, 0.0f, 0.0f}};
+}
+
+/**
+ * @brief Creates and returns a 3-component vector pointing fowards (0, 0, -1).
+ */
+ELSA_INLINE v3f V3Forward() {
+	return (v3f){{0.0f, 0.0f, -1.0f}};
+}
+
+/**
+ * @brief Creates and returns a 3-component vector pointing backards (0, 0, 1).
+ */
+ELSA_INLINE v3f V3Backard() {
+	return (v3f){{0.0f, 0.0f, 1.0f}};
+}
+
+/**
+* @brief Adds left to right and returns a copy of the result.
+*
+* @param left The first vector.
+* @param right The second vector.
+* @returns The resulting vector.
+*/
+ELSA_INLINE v3f V3Add(v3f left, v3f right) {
+	return (v3f){{left.x + right.x, left.y + right.y, left.z + right.z}};
+}
+
+/**
+* @brief Adds left to scalar and returns a copy of the result.
+*
+* @param left The first vector.
+* @param scalar The scalar value.
+* @returns The resulting vector.
+*/
+ELSA_INLINE v3f V3AddScalar(v3f left, f32 scalar) {
+	return (v3f){{left.x + scalar, left.y + scalar, left.z + scalar}};
+}
+
+
+/**
+* @brief Subtracts left to right and returns a copy of the result.
+*
+* @param left The first vector.
+* @param right The second vector.
+* @returns The resulting vector.
+*/
+ELSA_INLINE v3f V3Sub(v3f left, v3f right) {
+	return (v3f){{left.x - right.x, left.y - right.y, left.z - right.z}};
+}
+
+/**
+* @brief Substracts left to scalar and returns a copy of the result.
+*
+* @param left The first vector.
+* @param scalar The scalar value.
+* @returns The resulting vector.
+*/
+ELSA_INLINE v3f V3SubScalar(v3f left, f32 scalar) {
+	return (v3f){{left.x - scalar, left.y - scalar, left.z - scalar}};
+}
+
+/**
+* @brief Multiplies left by right and returns a copy of the result.
+*
+* @param left The first vector.
+* @param right The second vector.
+* @returns The resulting vector.
+*/
+ELSA_INLINE v3f V3Mul(v3f left, v3f right) {
+	return (v3f){{left.x * right.x, left.y * right.y, left.z * right.z}};
+}
+
+/**
+* @brief Multiplies left by scalar and returns a copy of the result.
+*
+* @param left The first vector.
+* @param scalar The scalar value.
+* @returns The resulting vector.
+*/
+ELSA_INLINE v3f V3MulScalar(v3f left, f32 scalar) {
+	return (v3f){{left.x * scalar, left.y * scalar, left.z * scalar}};
+}
+
+/**
+* @brief Divides left to right and returns a copy of the result.
+*
+* @param left The first vector.
+* @param right The second vector.
+* @returns The resulting vector.
+*/
+ELSA_INLINE v3f V3Div(v3f left, v3f right) {
+	return (v3f){{left.x / right.x, left.y / right.y, left.z / right.z}};
+}
+
+/**
+* @brief Divides left by scalar and returns a copy of the result.
+*
+* @param left The first vector.
+* @param scalar The scalar value.
+* @returns The resulting vector.
+*/
+ELSA_INLINE v3f V3DivScalar(v3f left, f32 scalar) {
+	return (v3f){{left.x / scalar, left.y / scalar, left.z / scalar}};
+}
+
+/**
+ * @brief Returns the squared length of the provided vector.
+ * 
+ * @param vector The vector to retrieve the squared length of.
+ * @return The squared length.
+ */
+ELSA_INLINE f32 V3LengthSquared(v3f vector) {
+	return vector.x * vector.x + vector.y * vector.y + vector.z * vector.z;
+}
+
+/**
+ * @brief Returns the length of the provided vector.
+ * 
+ * @param vector The vector to retrieve the length of.
+ * @return The length.
+ */
+ELSA_INLINE f32 V3Length(v3f vector) {
+	return Sqrt(V3LengthSquared(vector));
+}
+
+/**
+ * @brief Normalizes the provided vector in place to a unit vector.
+ * 
+ * @param vector A pointer to the vector to be normalized.
+ */
+ELSA_INLINE void V3Normalize(v3f* vector) {
+	const f32 length = V3Length(*vector);
+	vector->x /= length;
+	vector->y /= length;
+	vector->z /= length;
+}
+
+/**
+ * @brief Returns a normalized copy of the supplied vector.
+ * 
+ * @param vector The vector to be normalized.
+ * @return A normalized copy of the supplied vector 
+ */
+ELSA_INLINE v3f V3Normalized(v3f vector) {
+	V3Normalize(&vector);
+	return vector;
+}
+
+/**
+ * @brief Returns the distance between left and right.
+ * 
+ * @param left The first vector.
+ * @param right The second vector.
+ * @return The distance between left and right.
+ */
+ELSA_INLINE f32 V3Distance(v3f left, v3f right) {
+	v3f d = (v3f){{left.x - right.x, left.y - right.y, left.z - right.z}};
+	return V3Length(d);
+}
+
+/**
+ * @brief Returns the dot product between the provided vectors. Typically used
+ * to calculate the difference in direction.
+ * 
+ * @param left The first vector.
+ * @param right The second vector.
+ * @return The dot product. 
+ */
+ELSA_INLINE f32 V3Dot(v3f left, v3f right) {
+	return (left.x * right.x) + (left.y * right.y) + (left.z * right.z);
+}
+
+/**
+ * @brief Calculates and returns the cross product of the supplied vectors.
+ * The cross product is a new vector which is orthoganal to both provided vectors.
+ * 
+ * @param left The first vector.
+ * @param right The second vector.
+ * @return The cross product. 
+ */
+ELSA_INLINE v3f V3Cross(v3f left, v3f right) {
+	return (v3f) {{left.y * right.z - left.z * right.y, left.z * right.x - left.x * right.z, left.x * right.y - left.y * right.x}};
+}
+
+
 #endif
