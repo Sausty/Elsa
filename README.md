@@ -9,3 +9,4 @@ the tutorial seris of the Kohi Game Engine (https://www.youtube.com/watch?v=dHPu
 - Input layer (Keyboard, mouse and gamepad)
 - Containers (Dynamic array, hash table)
 - Audio system (using miniaudio)
+- Renderer system (Vulkan for Windows, Metal for MacOS)
