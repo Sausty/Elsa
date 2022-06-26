@@ -71,7 +71,9 @@ typedef i8 b8;
 // Platform detection
 #if defined(_WIN64) || defined(_WIN32)
     #define ELSA_PLATFORM_WINDOWS
+    #define ELSA_VULKAN
 #elif __APPLE__
+    #define ELSA_METAL
     #include <TargetConditionals.h>
     #if TARGET_OS_IPHONE && TARGET_OS_SIMULATOR
         #define ELSA_PLATFORM_IOS_SIMULATOR
@@ -85,10 +87,13 @@ typedef i8 b8;
     #endif
 #elif __linux
     #define ELSA_PLATFORM_LINUX
+    #define ELSA_VULKAN
 #elif __unix
     #define ELSA_PLATFORM_UNIX
+    #define ELSA_VULKAN
 #elif __posix
     #define ELSA_PLATFORM_POSIX
+    #define ELSA_VULKAN
 #else
     #error "Unknown platform!"
 #endif
