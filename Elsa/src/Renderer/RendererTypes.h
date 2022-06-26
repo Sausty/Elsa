@@ -12,10 +12,18 @@
 
 /** @brief Represents the render API used in the backend. */
 typedef enum RendererBackendAPI {
-    /** @brief The Vulkan backend */
+    /** @brief (SUPPORTED: DESKTOP) The Vulkan backend */
     RENDERER_BACKEND_API_VULKAN,
-    /** @brief The Metal backend */
-    RENDERER_BACKEND_API_METAL
+    /** @brief (SUPPORTED: APPLE) The Metal backend */
+    RENDERER_BACKEND_API_METAL,
+    /** @brief (UNSUPPORTED: WIN32) The DirectX11 backend */
+    RENDERER_BACKEND_API_DIRECTX11,
+    /** @brief (UNSUPPORTED: WIN32) The DirectX12 backend */
+    RENDERER_BACKEND_API_DIRECTX12,
+    /** @brief (UNSUPPORTED: DESKTOP) The OpenGL backend */
+    RENDERER_BACKEND_API_OPENGL,
+    /** @brief (UNSUPPORTED: SWITCH) The Deko3D backend */
+    RENDERER_BACKEND_API_DEKO3D
 } RendererBackendAPI;
 
 /**
