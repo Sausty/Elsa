@@ -9,6 +9,7 @@
 #define ELSA_MATH_H
 
 #include <Defines.h>
+#include <Math/MathTypes.h>
 
 /** @brief An approximate representation of PI. */
 #define E_PI 3.14159265358979323846f
