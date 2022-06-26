@@ -7,5 +7,5 @@ the tutorial seris of the Kohi Game Engine (https://www.youtube.com/watch?v=dHPu
 
 - Core functionnalities (Logging, platform layer)
 - Input layer (Keyboard, mouse and gamepad)
-- Containers (Dynamic array)
+- Containers (Dynamic array, hash table)
 - Audio system (using miniaudio)
