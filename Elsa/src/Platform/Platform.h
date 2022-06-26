@@ -108,4 +108,10 @@ ELSA_API void PlatformConsoleWrite(const char* message, u8 colour);
  */
 ELSA_API void PlatformConsoleWriteError(const char* message, u8 colour);
 
+/**
+ * @brief Gets an opaque pointer of the window view. HWND for Windows, CAMetalLayer* for MacOS.
+ * @returns The pointer of the window view.
+ */
+ELSA_API void* PlatformGetWindowView();
+
 #endif

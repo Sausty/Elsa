@@ -753,4 +753,9 @@ u16 TranslatePlayerIndex(GCControllerPlayerIndex index)
     return 0;
 }
 
+void* PlatformGetWindowView()
+{
+    return platform_state.Layer;
+}
+
 #endif

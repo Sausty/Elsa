@@ -444,4 +444,9 @@ f32 XInputBatteryToFloat(BYTE battery_level)
     return 0.0f;
 }
 
+void* PlatformGetWindowView()
+{
+    return platform_state.hwnd;
+}
+
 #endif
