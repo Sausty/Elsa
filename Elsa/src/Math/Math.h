@@ -1282,4 +1282,6 @@ ELSA_API m4f M4Rotate(f32 angle, v3f axis) {
 	return result;
 }
 
+// TODO(milo): Quaternions
+
 #endif
