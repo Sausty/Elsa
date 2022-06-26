@@ -166,4 +166,166 @@ ELSA_API f32 FRandom();
  */
 ELSA_API f32 FRandomInRange(f32 min, f32 max);
 
+// ------------------------------------------
+// Vector 2
+// ------------------------------------------
+
+/**
+ * @brief Creates and returns a 2-component vector with all components set to 0.0f.
+ */
+ELSA_INLINE v2f V2Zero() {
+	return (v2f){{0.0f, 0.0f}};
+}
+
+/**
+ * @brief Creates and returns a 2-component vector with all components set to 1.0f.
+ */
+ELSA_INLINE v2f V2One() {
+	return (v2f){{1.0f, 1.0f}};
+}
+
+/**
+* @brief Creates and returns a 2-component vector with all components set to the given value.
+* @param scalar The value to set.
+*/
+ELSA_INLINE v2f V2Scalar(f32 scalar) {
+	return (v2f){{scalar, scalar}};
+}
+
+/**
+* @brief Creates and returns a 2-component vector with its components set to the given values.
+* @param x The x value of the vector.
+* @param y The y value of the vector.
+*/
+ELSA_INLINE v2f V2Create(f32 x, f32 y) {
+	return (v2f){{x, y}};
+}
+
+/**
+ * @brief Creates and returns a 2-component vector pointing up (0, 1).
+ */
+ELSA_INLINE v2f V2Up() {
+    return (v2f){{0.0f, 1.0f}};
+}
+
+/**
+ * @brief Creates and returns a 2-component vector pointing down (0, -1).
+ */
+ELSA_INLINE v2f V2Down() {
+    return (v2f){{0.0f, -1.0f}};
+}
+
+/**
+ * @brief Creates and returns a 2-component vector pointing left (-1, 0).
+ */
+ELSA_INLINE v2f V2Left() {
+	return (v2f){{-1.0f, 0.0f}};
+}
+
+/**
+ * @brief Creates and returns a 2-component vector pointing right (1, 0).
+ */
+ELSA_INLINE v2f V2Right() {
+	return (v2f){{1.0f, 0.0f}};
+}
+
+/**
+* @brief Adds left to right and returns a copy of the result.
+*
+* @param left The first vector.
+* @param right The second vector.
+* @returns The resulting vector.
+*/
+ELSA_INLINE v2f V2Add(v2f left, v2f right) {
+	return (v2f){{left.x + right.x, left.y + right.y}};
+}
+
+
+/**
+* @brief Subtracts left to right and returns a copy of the result.
+*
+* @param left The first vector.
+* @param right The second vector.
+* @returns The resulting vector.
+*/
+ELSA_INLINE v2f V2Sub(v2f left, v2f right) {
+	return (v2f){{left.x - right.x, left.y - right.y}};
+}
+
+/**
+* @brief Multiplies left to right and returns a copy of the result.
+*
+* @param left The first vector.
+* @param right The second vector.
+* @returns The resulting vector.
+*/
+ELSA_INLINE v2f V2Mul(v2f left, v2f right) {
+	return (v2f){{left.x * right.x, left.y * right.y}};
+}
+
+/**
+* @brief Divides left to right and returns a copy of the result.
+*
+* @param left The first vector.
+* @param right The second vector.
+* @returns The resulting vector.
+*/
+ELSA_INLINE v2f V2Div(v2f left, v2f right) {
+	return (v2f){{left.x / right.x, left.y / right.y}};
+}
+
+/**
+ * @brief Returns the squared length of the provided vector.
+ * 
+ * @param vector The vector to retrieve the squared length of.
+ * @return The squared length.
+ */
+ELSA_INLINE f32 V2LengthSquared(v2f vector) {
+	return vector.x * vector.x + vector.y * vector.y;
+}
+
+/**
+ * @brief Returns the length of the provided vector.
+ * 
+ * @param vector The vector to retrieve the length of.
+ * @return The length.
+ */
+ELSA_INLINE f32 V2Length(v2f vector) {
+	return Sqrt(V2LengthSquared(vector));
+}
+
+/**
+ * @brief Normalizes the provided vector in place to a unit vector.
+ * 
+ * @param vector A pointer to the vector to be normalized.
+ */
+ELSA_INLINE void V2Normalize(v2f* vector) {
+	const f32 length = V2Length(*vector);
+	vector->x /= length;
+	vector->y /= length;
+}
+
+/**
+ * @brief Returns a normalized copy of the supplied vector.
+ * 
+ * @param vector The vector to be normalized.
+ * @return A normalized copy of the supplied vector 
+ */
+ELSA_INLINE v2f V2Normalized(v2f vector) {
+	V2Normalize(&vector);
+	return vector;
+}
+
+/**
+ * @brief Returns the distance between left and right.
+ * 
+ * @param left The first vector.
+ * @param right The second vector.
+ * @return The distance between left and right.
+ */
+ELSA_INLINE f32 V2Distance(v2f left, v2f right) {
+	v2f d = (v2f){{left.x - right.x, left.y - right.y}};
+	return V2Length(d);
+}
+
 #endif

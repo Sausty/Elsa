@@ -13,7 +13,7 @@
 /**
  * @brief A 2-element floating point vector.
  */
-typedef union v2f {
+typedef union vec2f {
 	f32 Elements[2];
 	struct {
 		union {
@@ -42,7 +42,7 @@ typedef union v2f {
 /**
  * @brief A 3-element floating point vector.
  */
-typedef union v3f {
+typedef union vec3f {
 	f32 Elements[3];
 	struct {
 		union {
@@ -81,7 +81,7 @@ typedef union v3f {
 /**
  * @brief A 4-element floating point vector.
  */
-typedef union v4f {
+typedef union vec4f {
 	f32 Elements[4];
 	struct {
 		union {
@@ -110,9 +110,7 @@ typedef union v4f {
 			/** @brief The third element. */
 			b,
 			/** @brief The third element. */
-			p,
-			/** @brief The third element. */
-			w;
+			p;
         };
 		union {
 			/** @brief The fourth element. */
