@@ -7,7 +7,7 @@ cFilenames=$(find . -type f -name "*.c" -o -name "*.m")
 Assembly="Elsa"
 CompilerFlags="-g -shared -fdeclspec -fPIC -fno-objc-arc -fsanitize=address"
 IncludeFlags="-Isrc -IVendor"
-LinkerFlags="-lobjc -framework AppKit -framework QuartzCore -framework GameController -framework CoreHaptics"
+LinkerFlags="-lobjc -framework AppKit -framework QuartzCore -framework GameController -framework CoreHaptics -framework Metal"
 Defines="-D_DEBUG -DELSA_EXPORT"
 
 echo "Building $Assembly..."

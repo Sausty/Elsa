@@ -4,6 +4,7 @@
 #include <Core/Logger.h>
 #include <Audio/Audio.h>
 #include <Platform/Platform.h>
+#include <Renderer/RendererFrontend.h>
 
 static ApplicationState app_state;
 
@@ -33,6 +34,7 @@ b8 ApplicationOnResize(u16 code, void* sender, void* listener, Event event)
             ELSA_DEBUG("Window Resized: %i, %i", width, height);
 
             app_state.game->OnResize(app_state.game, width, height);
+            RendererFrontendResized(width, height);
         }
     }
 
@@ -68,8 +70,18 @@ b8 ApplicationCreate(struct Game* game)
     EventRegister(EVENT_CODE_GAMEPAD_CONNECTED, 0, ApplicationOnControllerConnect);
     EventRegister(EVENT_CODE_GAMEPAD_DISCONNECTED, 0, ApplicationOnControllerDisconnect);
 
-    PlatformInit(&app_state);
-    AudioInit();
+    if (!PlatformInit(&app_state)) {
+        ELSA_FATAL("PlatformInit failed. Shutting down...");
+        return false;
+    }
+    if (!AudioInit()) {
+        ELSA_FATAL("AudioInit failed. Shutting down...");
+        return false;
+    }
+    if (!RendererFrontendInit(app_state.Name)) {
+        ELSA_FATAL("RendererFrontendInit failed. Shutting down...");
+        return false;
+    }
 
     if (!app_state.game->Init(app_state.game)) {
         ELSA_FATAL("Game failed to initialize.");
@@ -91,8 +103,19 @@ b8 ApplicationRun()
         PlatformUpdateGamepads();
         AudioUpdate();
 
-        app_state.game->Update(app_state.game);
-        app_state.game->Render(app_state.game);
+        if (!app_state.game->Update(app_state.game)) {
+            ELSA_ERROR("app_state.game->Update failed.");
+            return false;
+        }
+        if (!app_state.game->Render(app_state.game)) {
+            ELSA_ERROR("app_state.game->Render failed.");
+            return false;
+        }
+
+        if (!RendererFrontendDrawFrame(1.0f)) {
+            ELSA_ERROR("RendererFrontendDrawFrame failed.");
+            return false;
+        }
     }
 
     if (!app_state.game->Free(app_state.game))
@@ -105,6 +128,7 @@ b8 ApplicationRun()
     EventUnregister(EVENT_CODE_RESIZED, 0, ApplicationOnResize);
     EventUnregister(EVENT_CODE_APPLICATION_QUIT, 0, ApplicationOnEvent);
 
+    RendererFrontendShutdown();
     AudioExit();
     PlatformExit();
 

@@ -334,6 +334,7 @@ b8 PlatformInit(ApplicationState* app_state)
         platform_state.View = [[ContentView alloc] initWithWindow:platform_state.Window];
         [platform_state.View setLayer:platform_state.Layer];
         [platform_state.View setWantsLayer:YES];
+        platform_state.Layer.frame = platform_state.View.bounds;
 
         [platform_state.Window setLevel:NSNormalWindowLevel];
         [platform_state.Window setContentView:platform_state.View];

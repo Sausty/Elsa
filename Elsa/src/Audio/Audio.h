@@ -15,8 +15,10 @@ typedef struct AudioClip AudioClip;
 
 /**
  * @brief Initialises the audio system.
+ * 
+ * @returns True on success; otherwise false;
  */
-ELSA_API void AudioInit();
+ELSA_API b8 AudioInit();
 
 /**
  * @brief Terminates the audio system.

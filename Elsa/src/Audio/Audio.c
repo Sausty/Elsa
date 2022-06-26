@@ -53,7 +53,7 @@ void DataCallback(ma_device* pDevice, void* pOutput, const void* pInput, ma_uint
     (void)pInput;
 }
 
-void AudioInit()
+b8 AudioInit()
 {
     state.DeviceConfig = ma_device_config_init(ma_device_type_playback);
     state.DeviceConfig.playback.format = SAMPLE_FORMAT;
@@ -62,9 +62,17 @@ void AudioInit()
     state.DeviceConfig.dataCallback = DataCallback;
     state.DeviceConfig.pUserData = NULL;
 
-    ma_device_init(NULL, &state.DeviceConfig, &state.Device);
-    ma_device_start(&state.Device);
-}
+    if (ma_device_init(NULL, &state.DeviceConfig, &state.Device) != MA_SUCCESS) {
+        ELSA_ERROR("ma_device_init failed. Shutting down...");
+        return false;
+    }
+    if (ma_device_start(&state.Device) != MA_SUCCESS) {
+        ELSA_ERROR("ma_device_start failed. Shutting down...");
+        return false;
+    }
+    
+    return true; 
+}  
 
 void AudioExit()
 {
