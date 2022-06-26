@@ -155,9 +155,7 @@ b8 SelectPhysicalDevice(VulkanContext* context)
 
         VkPhysicalDeviceMemoryProperties memory;
         vkGetPhysicalDeviceMemoryProperties(physical_devices[i], &memory);
-
-        ELSA_INFO("Evaluating device: '%s', index %u.", properties.deviceName, i);
-
+        
         VulkanPhysicalDeviceRequirements requirements = {};
         requirements.Graphics = true;
         requirements.Compute = true;
@@ -218,6 +216,8 @@ b8 VulkanDeviceCreate(VulkanContext* context)
 
     VkPhysicalDeviceFeatures device_features = {};
     device_features.samplerAnisotropy = VK_TRUE;  // Request anistrophy
+    device_features.fillModeNonSolid = VK_TRUE;
+    device_features.pipelineStatisticsQuery = VK_TRUE;
 
     u32 available_extension_count = 0;
     VkExtensionProperties* available_extensions = 0;
