@@ -597,5 +597,286 @@ ELSA_INLINE v3f V3Cross(v3f left, v3f right) {
 	return (v3f) {{left.y * right.z - left.z * right.y, left.z * right.x - left.x * right.z, left.x * right.y - left.y * right.x}};
 }
 
+// ------------------------------------------
+// Vector 4
+// ------------------------------------------
+
+/**
+ * @brief Creates and returns a new 4-element vector using the supplied values.
+ * 
+ * @param x The x value.
+ * @param y The y value.
+ * @param z The z value.
+ * @param w The w value.
+ * @return A new 4-element vector.
+ */
+ELSA_INLINE v4f V4Create(f32 x, f32 y, f32 z, f32 w) {
+	v4f out_vector;
+#ifdef ELSA_USE_SSE
+	out_vector.InternalElementsSSE = _mm_setr_ps(x, y, z, w);
+#else
+	out_vector.x = x;
+	out_vector.y = y;
+	out_vector.z = z;
+	out_vector.w = w;
+#endif
+	return out_vector;
+}
+
+/**
+ * @brief Returns a new vec3 containing the x, y and z components of the 
+ * supplied vec4, essentially dropping the w component.
+ * 
+ * @param vector The 4-component vector to extract from.
+ * @return A new vec3 
+ */
+ELSA_INLINE v3f V4ToV3(v4f vector) {
+	return (v3f){{vector.x, vector.y, vector.z}};
+}
+
+/**
+ * @brief Returns a new vec4 using vector as the x, y and z components and w for w.
+ * 
+ * @param vector The 3-component vector.
+ * @param w The w component.
+ * @return A new vec4 
+ */
+ELSA_INLINE v4f V4FromV3(v3f vector, f32 w) {
+#ifdef ELSA_USE_SSE
+	v4f out_vector;
+	out_vector.InternalElementsSSE = _mm_setr_ps(vector.x, vector.y, vector.z, w);
+	return out_vector;
+#else
+	return (v4f){{vector.x, vector.y, vector.z, w}};
+#endif
+}
+
+/**
+ * @brief Creates and returns a 4-component vector with all components set to 0.0f.
+ */
+ELSA_INLINE v4f V4Zero() {
+#ifdef ELSA_USE_SSE
+	v4f out_vector;
+	out_vector.InternalElementsSSE = _mm_setr_ps(0.0f, 0.0f, 0.0f, 0.0f);
+	return out_vector;
+#else
+	return (v4f){{0.0f, 0.0f, 0.0f, 0.0f}};
+#endif
+}
+
+/**
+ * @brief Creates and returns a 4-component vector with all components set to 1.0f.
+ */
+ELSA_INLINE v4f V4One() {
+#ifdef ELSA_USE_SSE
+	v4f out_vector;
+	out_vector.InternalElementsSSE = _mm_setr_ps(1.0f, 1.0f, 1.0f, 1.0f);
+	return out_vector;
+#else
+	return (v4f){{1.0f, 1.0f, 1.0f, 1.0f}};
+#endif
+}
+
+/**
+* @brief Adds left to right and returns a copy of the result.
+*
+* @param left The first vector.
+* @param right The second vector.
+* @returns The resulting vector.
+*/
+ELSA_INLINE v4f V4Add(v4f left, v4f right) {
+#ifdef ELSA_USE_SSE
+	v4f out_vector;
+	out_vector.InternalElementsSSE = _mm_add_ps(left.InternalElementsSSE, right.InternalElementsSSE);
+	return out_vector;
+#else
+	return (v4f){{left.x + right.x, left.y + right.y, left.z + right.z, left.w + right.w}};
+#endif
+}
+
+/**
+* @brief Adds left to scalar and returns a copy of the result.
+*
+* @param left The first vector.
+* @param scalar The scalar value.
+* @returns The resulting vector.
+*/
+ELSA_INLINE v4f V4AddScalar(v4f left, f32 scalar) {
+	return (v4f){{left.x + scalar, left.y + scalar, left.z + scalar, left.w + scalar}};
+}
+
+
+/**
+* @brief Subtracts left to right and returns a copy of the result.
+*
+* @param left The first vector.
+* @param right The second vector.
+* @returns The resulting vector.
+*/
+ELSA_INLINE v4f V4Sub(v4f left, v4f right) {
+#ifdef ELSA_USE_SSE
+	v4f out_vector;
+	out_vector.InternalElementsSSE = _mm_sub_ps(left.InternalElementsSSE, right.InternalElementsSSE);
+	return out_vector;
+#else
+	return (v4f){{left.x - right.x, left.y - right.y, left.z - right.z, left.w - right.w}};
+#endif
+}
+
+/**
+* @brief Subtracts left to scalar and returns a copy of the result.
+*
+* @param left The first vector.
+* @param scalar The scalar value.
+* @returns The resulting vector.
+*/
+ELSA_INLINE v4f V4SubScalar(v4f left, f32 scalar) {
+	return (v4f){{left.x - scalar, left.y - scalar, left.z - scalar, left.w - scalar}};
+}
+
+/**
+* @brief Multiplies left by right and returns a copy of the result.
+*
+* @param left The first vector.
+* @param right The second vector.
+* @returns The resulting vector.
+*/
+ELSA_INLINE v4f V4Mul(v4f left, v4f right) {
+#ifdef ELSA_USE_SSE
+	v4f out_vector;
+	out_vector.InternalElementsSSE = _mm_mul_ps(left.InternalElementsSSE, right.InternalElementsSSE);
+	return out_vector;
+#else
+	return (v4f){{left.x * right.x, left.y * right.y, left.z * right.z, left.w * right.w}};
+#endif
+}
+
+/**
+* @brief Multiplies left by scalar and returns a copy of the result.
+*
+* @param left The first vector.
+* @param scalar The scalar value.
+* @returns The resulting vector.
+*/
+ELSA_INLINE v4f V4MulScalar(v4f left, f32 scalar) {
+	return (v4f){{left.x * scalar, left.y * scalar, left.z * scalar, left.w * scalar}};
+}
+
+/**
+* @brief Divides left by right and returns a copy of the result.
+*
+* @param left The first vector.
+* @param right The second vector.
+* @returns The resulting vector.
+*/
+ELSA_INLINE v4f V4Div(v4f left, v4f right) {
+#ifdef ELSA_USE_SSE
+	v4f out_vector;
+	out_vector.InternalElementsSSE = _mm_div_ps(left.InternalElementsSSE, right.InternalElementsSSE);
+	return out_vector;
+#else
+	return (v4f){{left.x / right.x, left.y / right.y, left.z / right.z, left.w / right.w}};
+#endif
+}
+
+/**
+* @brief Divides left by scalar and returns a copy of the result.
+*
+* @param left The first vector.
+* @param scalar The scalar value.
+* @returns The resulting vector.
+*/
+ELSA_INLINE v4f V4DivScalar(v4f left, f32 scalar) {
+	return (v4f){{left.x / scalar, left.y / scalar, left.z / scalar, left.w / scalar}};
+}
+
+/**
+ * @brief Returns the dot product between the provided vectors. Typically used
+ * to calculate the difference in direction.
+ * 
+ * @param left The first vector.
+ * @param right The second vector.
+ * @return The dot product. 
+ */
+ELSA_API f32 V4Dot(v4f left, v4f right) {
+	f32 result = 0.0f;
+#ifdef ELSA_USE_SSE
+	__m128 SSEResultOne = _mm_mul_ps(left.InternalElementsSSE, right.InternalElementsSSE);
+    __m128 SSEResultTwo = _mm_shuffle_ps(SSEResultOne, SSEResultOne, _MM_SHUFFLE(2, 3, 0, 1));
+    SSEResultOne = _mm_add_ps(SSEResultOne, SSEResultTwo);
+    SSEResultTwo = _mm_shuffle_ps(SSEResultOne, SSEResultOne, _MM_SHUFFLE(0, 1, 2, 3));
+    SSEResultOne = _mm_add_ps(SSEResultOne, SSEResultTwo);
+    _mm_store_ss(&result, SSEResultOne);
+#else
+	result = (left.x * right.x) + (left.y * right.y) + (left.z * right.z) + (left.w * right.w);
+#endif
+	return result;
+}
+
+/**
+ * @brief Returns the squared length of the provided vector.
+ * 
+ * @param vector The vector to retrieve the squared length of.
+ * @return The squared length.
+ */
+ELSA_INLINE f32 V4LengthSquared(v4f vector) {
+	return V4Dot(vector, vector);
+}
+
+/**
+ * @brief Returns the length of the provided vector.
+ * 
+ * @param vector The vector to retrieve the length of.
+ * @return The length.
+ */
+ELSA_INLINE f32 V4Length(v4f vector) {
+	return Sqrt(V4LengthSquared(vector));
+}
+
+/**
+ * @brief Normalizes the provided vector in place to a unit vector.
+ * 
+ * @param vector A pointer to the vector to be normalized.
+ */
+ELSA_INLINE void V4Normalize(v4f* vector) {
+	const f32 length = V4Length(*vector);
+	if (length != 0.0f)
+	{
+		f32 multiplier = 1.0f / length;
+		
+#ifdef ELSA_USE_SSE
+		__m128 SSEMultiplier = _mm_set1_ps(multiplier);
+		vector->InternalElementsSSE = _mm_mul_ps(vector->InternalElementsSSE, SSEMultiplier);
+#else
+		vector->x *= multiplier;
+		vector->y *= multiplier;
+		vector->z *= multiplier;
+		vector->w *= multiplier;
+#endif
+	}
+}
+
+/**
+ * @brief Returns a normalized copy of the supplied vector.
+ * 
+ * @param vector The vector to be normalized.
+ * @return A normalized copy of the supplied vector 
+ */
+ELSA_INLINE v4f V4Normalized(v4f vector) {
+	V4Normalize(&vector);
+	return vector;
+}
+
+/**
+ * @brief Returns the distance between left and right.
+ * 
+ * @param left The first vector.
+ * @param right The second vector.
+ * @return The distance between left and right.
+ */
+ELSA_INLINE f32 V4Distance(v4f left, v4f right) {
+	v4f d = V4Sub(left, right);
+	return V4Length(d);
+}
 
 #endif

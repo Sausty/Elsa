@@ -10,6 +10,16 @@
 
 #include <Defines.h>
 
+#ifdef _MSC_VER
+#ifdef __SSE__
+#define ELSA_USE_SSE 1
+#endif
+#endif
+
+#ifdef ELSA_USE_SSE
+#include <xmmintrin.h>
+#endif
+
 /**
  * @brief A 2-element floating point vector.
  */
@@ -121,15 +131,23 @@ typedef union vec4f {
 			q;
 		};
 	};
+	
+#ifdef ELSA_USE_SSE
+	__m128 InternalElementsSSE;
+#endif
 } v4f;
 
 /** @brief A quaternion, used to represent rotational orientation. */
 typedef v4f q4f;
 
-/** @brief a floating point 4x4 matrix, typically used to represent object transformations. */
+/** @brief a floating point 4x4 matrix, typically used to represent object transformations. Column-major. */
 typedef union m4f {
 	/** @brief The matrix elements */
-	f32 Data[16];
+	f32 Data[4][4];
+	
+#ifdef ELSA_USE_SSE
+	__m128 Columns[4];
+#endif
 } m4f;
 
 /**
