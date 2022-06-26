@@ -1,7 +1,7 @@
 /**
  * @file Darray.h
  * @author Milo Heinrich (MikuoH15TH@gmail.com)
- * @brief This files contains an implementation of a dynamic array.
+ * @brief This file contains an implementation of a dynamic array.
  * @version 1.0
  * @date 2022-06-17
  */
