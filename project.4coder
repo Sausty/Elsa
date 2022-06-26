@@ -1,0 +1,47 @@
+version(1);
+project_name = "Elsa";
+
+patterns = {
+	"*.c",
+	"*.cpp",
+	"*.h",
+	"*.m",
+	"*.bat",
+	"*.sh",
+	"*.4coder",
+	"*.glsl",
+	"*.hlsl",
+	"*.msl"
+};
+
+load_paths_custom = {
+	{"."},
+	{"Elsa"},
+	{"Elsa/Vendor"}
+};
+
+load_paths = {
+	{ load_paths_custom, .os = "win" },
+	{ load_paths_custom, .os = "mac" }
+};
+
+build_win32 = "build-windows.bat";
+build_macos = "./build-macos.sh";
+run_win32 = "call bin\App.exe";
+run_macos = "cd bin && ./App && cd ../";
+
+command_list = {
+	{
+		.name = "build",
+		.out = "*compilation*", .footer_panel = true, .save_dirty_files = true, .cursor_at_end = true,
+		.cmd = { {build_win32, .os = "win"}, {build_macos, .os = "mac"}, },
+	},
+	{
+		.name = "run",
+		.out = "*compilation*", .footer_panel = true, .save_dirty_files = true, .cursor_at_end = true,
+		.cmd = { {run_win32, .os = "win"}, {run_macos, .os = "mac"}, },	
+	},
+};
+
+fkey_command[1] = "build";
+fkey_command[5] = "run";

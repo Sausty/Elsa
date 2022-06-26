@@ -36,7 +36,7 @@ typedef enum RendererBackendAPI {
 typedef struct RendererBackend {
     u64 FrameNumber;
     RendererBackendAPI API;
-
+	
     /**
      * @brief Initializes the backend.
      *
@@ -44,14 +44,14 @@ typedef struct RendererBackend {
      * @returns True if initialized successfully; otherwise false.
      */
     b8 (*Init)(struct RendererBackend* backend);
-
+	
     /**
      * @brief Shuts the renderer backend down.
      *
      * @param backend A pointer to the generic backend interface.
      */
     void (*Shutdown)(struct RendererBackend* backend);
-
+	
     /**
      * @brief Handles window resizes.
      *
@@ -60,7 +60,7 @@ typedef struct RendererBackend {
      * @param height The new window height.
      */
     void (*Resized)(struct RendererBackend* backend, u16 width, u16 height);
-
+	
     /**
      * @brief Performs setup routines required at the start of a frame.
      * @note A false result does not necessarily indicate failure. It can also specify that
@@ -72,7 +72,7 @@ typedef struct RendererBackend {
      * @return True if successful; otherwise false.
      */
     b8 (*BeginFrame)(struct RendererBackend* backend, f32 delta_time);
-
+	
     /**
      * @brief Performs routines required to draw a frame, such as presentation. Should only be called
      * after a successful return of begin_frame.
