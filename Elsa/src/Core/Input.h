@@ -48,7 +48,7 @@ typedef enum GamepadButtons {
 } GamepadButtons;
 
 /**
- * @brief Represents analog gamepad inputs for triggers and analog sticks.
+ * @brief Represents physical locations of gamepad analog devices. This enum can be used for joysticks and triggers.
  */
 typedef enum GamepadAnalog {
     /** @brief The left analog input */
