@@ -13,20 +13,27 @@
 #include <vulkan/vulkan.h>
 
 // TODO(milo): Add assertions
+// TODO(milo): Image
+// TODO(milo): Swapchain
+// TODO(milo): Buffer
+// TODO(milo): Render passes
+// TODO(milo): Graphics and compute pipelines
+// TODO(milo): Shader system
+
 #define VK_CHECK(error) error
 
 typedef struct VulkanDevice {
     VkPhysicalDevice PhysicalDevice;
     VkDevice LogicalDevice;
-
+	
     i32 GraphicsQueueIndex;
     i32 ComputeQueueIndex;
     i32 TransferQueueIndex;
-
+	
     VkQueue GraphicsQueue;
     VkQueue ComputeQueue;
     VkQueue TransferQueue;
-
+	
     VkPhysicalDeviceProperties Properties;
     VkPhysicalDeviceFeatures Features;
     
@@ -35,10 +42,10 @@ typedef struct VulkanDevice {
 
 typedef struct VulkanContext {
     f32 FrameDeltaTime;
-
+	
     u32 FramebufferWidth;
     u32 FramebufferHeight;
-
+	
     VkInstance Instance;
     VkSurfaceKHR Surface;
     VulkanDevice Device;
