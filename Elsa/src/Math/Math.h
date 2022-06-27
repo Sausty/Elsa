@@ -42,10 +42,10 @@
 #define E_SQRT_ONE_OVER_THREE 0.57735026918962576450f
 
 /** @brief A multiplier used to convert degrees to radians. */
-#define E_DEG2RAD_MULTIPLIER K_PI / 180.0f
+#define E_DEG2RAD_MULTIPLIER E_PI / 180.0f
 
 /** @brief A multiplier used to convert radians to degrees. */
-#define E_RAD2DEG_MULTIPLIER 180.0f / K_PI
+#define E_RAD2DEG_MULTIPLIER 180.0f / E_PI
 
 /** @brief The multiplier to convert seconds to milliseconds. */
 #define E_SEC_TO_MS_MULTIPLIER 1000.0f
@@ -1282,6 +1282,383 @@ ELSA_API m4f M4Rotate(f32 angle, v3f axis) {
 	return result;
 }
 
-// TODO(milo): Quaternions
+// ------------------------------------------
+// Quaternions
+// ------------------------------------------
+
+/**
+ * @brief Creates an identity quaternion.
+ * 
+ * @returns An identity quaternion.
+ */
+ELSA_INLINE q4f Q4Identity() {
+#ifdef ELSA_USE_SSE
+	q4f result;
+	result.InternalElementsSSE = _mm_setr_ps(0.0f, 0.0f, 0.0f, 1.0f);
+	return result;
+#else
+	return (q4f){{0.0f, 0.0f, 0.0f, 1.0f}};
+#endif
+}
+
+/**
+* @brief Creates a quaternion.
+*
+* @param x The x component of the quaternion.
+* @param y The y component of the quaternion.
+* @param z The z component of the quaternion.
+* @param w The w component of the quaternion.
+* @returns The created quaternion.
+*/
+ELSA_INLINE q4f Q4Create(f32 x, f32 y, f32 z, f32 w) {
+#ifdef ELSA_USE_SSE
+	q4f result;
+	result.InternalElementsSSE = _mm_setr_ps(x, y, z, w);
+	return result;
+#else 
+	return (q4f){{x, y, z, w}};
+#endif
+}
+
+/**
+* @brief Adds left to right.
+*
+* @param left The left quaternion
+* @param right The right quaternion
+* @returns The result quaternion
+*/
+ELSA_INLINE q4f Q4Add(q4f left, q4f right) {
+	q4f result;
+#ifdef ELSA_USE_SSE
+	result.InternalElementsSSE = _mm_add_ps(left.InternalElementsSSE, right.InternalElementsSSE);
+#else
+	result.x = left.x + right.x;
+	result.y = left.y + right.y;
+	result.z = left.z + right.z;
+	result.w = left.w + right.w;
+#endif
+	return result;
+}
+
+/**
+* @brief Subtracts left to right.
+*
+* @param left The left quaternion
+* @param right The right quaternion
+* @returns The result quaternion
+*/
+ELSA_INLINE q4f Q4Sub(q4f left, q4f right) {
+	q4f result;
+#ifdef ELSA_USE_SSE
+	result.InternalElementsSSE = _mm_sub_ps(left.InternalElementsSSE, right.InternalElementsSSE);
+#else
+	result.x = left.x - right.x;
+	result.y = left.y - right.y;
+	result.z = left.z - right.z;
+	result.w = left.w - right.w;
+#endif
+	return result;
+}
+
+/**
+* @brief Multiplies left by right.
+*
+* @param left The left quaternion
+* @param right The right quaternion
+* @returns The result quaternion
+*/
+ELSA_INLINE q4f Q4Mul(q4f left, q4f right) {
+	q4f result;
+#ifdef ELSA_USE_SSE
+	__m128 SSEResultOne = _mm_xor_ps(_mm_shuffle_ps(left.InternalElementsSSE, left.InternalElementsSSE, _MM_SHUFFLE(0, 0, 0, 0)), _mm_setr_ps(0.f, -0.f, 0.f, -0.f));
+    __m128 SSEResultTwo = _mm_shuffle_ps(right.InternalElementsSSE, right.InternalElementsSSE, _MM_SHUFFLE(0, 1, 2, 3));
+    __m128 SSEResultThree = _mm_mul_ps(SSEResultTwo, SSEResultOne);
+	
+    SSEResultOne = _mm_xor_ps(_mm_shuffle_ps(left.InternalElementsSSE, left.InternalElementsSSE, _MM_SHUFFLE(1, 1, 1, 1)) , _mm_setr_ps(0.f, 0.f, -0.f, -0.f));
+    SSEResultTwo = _mm_shuffle_ps(right.InternalElementsSSE, right.InternalElementsSSE, _MM_SHUFFLE(1, 0, 3, 2));
+    SSEResultThree = _mm_add_ps(SSEResultThree, _mm_mul_ps(SSEResultTwo, SSEResultOne));
+	
+    SSEResultOne = _mm_xor_ps(_mm_shuffle_ps(left.InternalElementsSSE, left.InternalElementsSSE, _MM_SHUFFLE(2, 2, 2, 2)), _mm_setr_ps(-0.f, 0.f, 0.f, -0.f));
+    SSEResultTwo = _mm_shuffle_ps(right.InternalElementsSSE, right.InternalElementsSSE, _MM_SHUFFLE(2, 3, 0, 1));
+    SSEResultThree = _mm_add_ps(SSEResultThree, _mm_mul_ps(SSEResultTwo, SSEResultOne));
+	
+    SSEResultOne = _mm_shuffle_ps(left.InternalElementsSSE, left.InternalElementsSSE, _MM_SHUFFLE(3, 3, 3, 3));
+    SSEResultTwo = _mm_shuffle_ps(right.InternalElementsSSE, right.InternalElementsSSE, _MM_SHUFFLE(3, 2, 1, 0));
+    result.InternalElementsSSE = _mm_add_ps(SSEResultThree, _mm_mul_ps(SSEResultTwo, SSEResultOne));
+#else
+	result.X = (left.x * right.w) + (left.y * right.z) - (left.z * right.y) + (left.w * right.x);
+    result.Y = (-left.x * right.z) + (left.y * right.w) + (left.z * right.x) + (left.w * right.y);
+    result.Z = (left.x * right.y) - (left.y * right.x) + (left.z * right.w) + (left.w * right.z);
+    result.W = (-left.x * right.x) - (left.y * right.y) - (left.z * right.z) + (left.w * right.w);
+#endif
+	return result;
+}
+
+/**
+* @brief Multiplies left by scalar.
+*
+* @param left The left quaternion
+* @param scalar The scalar value.
+* @returns The result quaternion
+*/
+ELSA_INLINE q4f Q4MultiplyScalar(q4f left, f32 scalar) {
+	q4f result;
+#ifdef ELSA_USE_SSE
+	__m128 scal = _mm_set1_ps(scalar);
+	result.InternalElementsSSE = _mm_mul_ps(left.InternalElementsSSE, scal);
+#else
+	result.x = left.x * scalar;
+	result.y = left.y * scalar;
+	result.z = left.z * scalar;
+	result.w = left.w * scalar;
+#endif
+	return result;
+}
+
+/**
+* @brief Divides left by scalar.
+*
+* @param left The left quaternion
+* @param scalar The scalar value.
+* @returns The result quaternion
+*/
+ELSA_INLINE q4f Q4DivideScalar(q4f left, f32 scalar) {
+	q4f result;
+#ifdef ELSA_USE_SSE
+	__m128 scal = _mm_set1_ps(scalar);
+	result.InternalElementsSSE = _mm_div_ps(left.InternalElementsSSE, scal);
+#else
+	result.x = left.x / scalar;
+	result.y = left.y / scalar;
+	result.z = left.z / scalar;
+	result.w = left.w / scalar;
+#endif
+	return result;
+}
+
+/**
+* @brief The dot product between left and right.
+*
+* @param left The left quaternion.
+* @param right The right quaternion.
+* @returns The result quaternion
+*/
+ELSA_INLINE f32 Q4Dot(q4f left, q4f right) {
+	f32 result;
+#ifdef ELSA_USE_SSE
+	__m128 SSEResultOne = _mm_mul_ps(left.InternalElementsSSE, right.InternalElementsSSE);
+    __m128 SSEResultTwo = _mm_shuffle_ps(SSEResultOne, SSEResultOne, _MM_SHUFFLE(2, 3, 0, 1));
+    SSEResultOne = _mm_add_ps(SSEResultOne, SSEResultTwo);
+    SSEResultTwo = _mm_shuffle_ps(SSEResultOne, SSEResultOne, _MM_SHUFFLE(0, 1, 2, 3));
+    SSEResultOne = _mm_add_ps(SSEResultOne, SSEResultTwo);
+    _mm_store_ss(&result, SSEResultOne);
+#else
+	result = (left.x * right.x) + (left.y * right.y) + (left.z * right.z) + (left.w * right.w);
+#endif
+	return result;
+}
+
+/**
+ * @brief Returns the normal of the provided quaternion.
+ * 
+ * @param q The quaternion.
+ * @returns The normal of the provided quaternion.
+ */
+ELSA_INLINE f32 Q4Normal(q4f q) {
+	return Sqrt(Q4Dot(q, q));
+}
+
+/**
+ * @brief Returns the conjugate of the provided quaternion. That is,
+ * The x, y and z elements are negated, but the w element is untouched.
+ * 
+ * @param q The quaternion to obtain a conjugate of.
+ * @return The conjugate quaternion.
+ */
+ELSA_INLINE q4f Q4Conjugate(q4f q) {
+	return (q4f){{-q.x, -q.y, -q.z, q.w}};
+}
+
+/**
+ * @brief Returns a normalized copy of the provided quaternion.
+ * 
+ * @param q The quaternion to normalize.
+ * @return A normalized copy of the provided quaternion.
+ */
+ELSA_INLINE q4f Q4Normalize(q4f q) {
+	q4f result;
+	f32 norm = Q4Normal(q);
+#ifdef ELSA_USE_SSE
+	__m128 multiplier = _mm_set1_ps(norm);
+	result.InternalElementsSSE = _mm_div_ps(q.InternalElementsSSE, multiplier);
+#else
+	result.x = q.x / norm;
+	result.y = q.y / norm;
+	result.z = q.z / norm;
+	result.w = q.w / norm;
+#endif
+	return result;
+}
+
+/**
+ * @brief Returns an inverse copy of the provided quaternion.
+ * 
+ * @param q The quaternion to invert.
+ * @return An inverse copy of the provided quaternion.
+ */
+ELSA_INLINE q4f Q4Inverse(q4f q) {
+	return Q4Normalize(Q4Conjugate(q));
+}
+
+/**
+ * @brief Creates a rotation matrix from the given quaternion.
+ * 
+ * @param q The quaternion to be used.
+ * @return A rotation matrix.
+ */
+ELSA_API m4f Q4ToM4(q4f q) {
+	m4f Result = M4Identity();
+	q4f NormalizedQuaternion = Q4Normalize(q);
+	
+	f32 XX, YY, ZZ, XY, XZ, YZ, WX, WY, WZ;
+	
+    XX = NormalizedQuaternion.x * NormalizedQuaternion.x;
+    YY = NormalizedQuaternion.y * NormalizedQuaternion.y;
+    ZZ = NormalizedQuaternion.z * NormalizedQuaternion.z;
+    XY = NormalizedQuaternion.x * NormalizedQuaternion.y;
+    XZ = NormalizedQuaternion.x * NormalizedQuaternion.z;
+    YZ = NormalizedQuaternion.y * NormalizedQuaternion.z;
+    WX = NormalizedQuaternion.w * NormalizedQuaternion.x;
+    WY = NormalizedQuaternion.w * NormalizedQuaternion.y;
+    WZ = NormalizedQuaternion.w * NormalizedQuaternion.z;
+	
+    Result.Elements[0][0] = 1.0f - 2.0f * (YY + ZZ);
+    Result.Elements[0][1] = 2.0f * (XY + WZ);
+    Result.Elements[0][2] = 2.0f * (XZ - WY);
+    Result.Elements[0][3] = 0.0f;
+	
+    Result.Elements[1][0] = 2.0f * (XY - WZ);
+    Result.Elements[1][1] = 1.0f - 2.0f * (XX + ZZ);
+    Result.Elements[1][2] = 2.0f * (YZ + WX);
+    Result.Elements[1][3] = 0.0f;
+	
+    Result.Elements[2][0] = 2.0f * (XZ + WY);
+    Result.Elements[2][1] = 2.0f * (YZ - WX);
+    Result.Elements[2][2] = 1.0f - 2.0f * (XX + YY);
+    Result.Elements[2][3] = 0.0f;
+	
+    Result.Elements[3][0] = 0.0f;
+    Result.Elements[3][1] = 0.0f;
+    Result.Elements[3][2] = 0.0f;
+    Result.Elements[3][3] = 1.0f;
+	
+	return Result;
+}
+
+/**
+ * @brief Creates a quaternion from the given axis and angle.
+ * 
+ * @param axis The axis of rotation.
+ * @param angle The angle of rotation.
+ * @param normalize Indicates if the quaternion should be normalized.
+ * @return A new quaternion. 
+ */
+ELSA_INLINE q4f Q4FromAxis(v3f axis, f32 angle, b8 normalize) {
+	const f32 half_angle = 0.5f * angle;
+    f32 s = Sin(half_angle);
+    f32 c = Cos(half_angle);
+	
+#ifdef ELSA_USE_SSE
+	q4f q;
+	q.InternalElementsSSE = _mm_setr_ps(s * axis.x, s * axis.y, s * axis.z, c);
+#else
+	q4f q = (q4f){{s * axis.x, s * axis.y, s * axis.z, c}};
+#endif
+    if (normalize) {
+        return Q4Normalize(q);
+    }
+    return q;
+}
+
+/**
+ * @brief Calculates spherical linear interpolation of a given percentage
+ * between two quaternions.
+ * 
+ * @param q_0 The first quaternion.
+ * @param q_1 The second quaternion.
+ * @param percentage The percentage of interpolation, typically a value from 0.0f-1.0f.
+ * @return An interpolated quaternion. 
+ */
+ELSA_INLINE q4f Q4Slerp(q4f q_0, q4f q_1, f32 percentage) {
+	q4f out_quaternion;
+    // Source: https://en.wikipedia.org/wiki/Slerp
+    // Only unit quaternions are valid rotations.
+    // Normalize to avoid undefined behavior.
+    q4f v0 = Q4Normalize(q_0);
+    q4f v1 = Q4Normalize(q_1);
+	
+    // Compute the cosine of the angle between the two vectors.
+    f32 dot = Q4Dot(v0, v1);
+	
+    // If the dot product is negative, slerp won't take
+    // the shorter path. Note that v1 and -v1 are equivalent when
+    // the negation is applied to all four components. Fix by
+    // reversing one quaternion.
+    if (dot < 0.0f) {
+        v1.x = -v1.x;
+        v1.y = -v1.y;
+        v1.z = -v1.z;
+        v1.w = -v1.w;
+        dot = -dot;
+    }
+	
+    const f32 DOT_THRESHOLD = 0.9995f;
+    if (dot > DOT_THRESHOLD) {
+        // If the inputs are too close for comfort, linearly interpolate
+        // and normalize the result.
+        out_quaternion = Q4Create(
+								  v0.x + ((v1.x - v0.x) * percentage),
+								  v0.y + ((v1.y - v0.y) * percentage),
+								  v0.z + ((v1.z - v0.z) * percentage),
+								  v0.w + ((v1.w - v0.w) * percentage));
+		
+        return Q4Normalize(out_quaternion);
+    }
+	
+    // Since dot is in range [0, DOT_THRESHOLD], acos is safe
+    f32 theta_0 = Acos(dot);          // theta_0 = angle between input vectors
+    f32 theta = theta_0 * percentage;  // theta = angle between v0 and result
+    f32 sin_theta = Sin(theta);       // compute this value only once
+    f32 sin_theta_0 = Sin(theta_0);   // compute this value only once
+	
+    f32 s0 = Cos(theta) - dot * sin_theta / sin_theta_0;  // == sin(theta_0 - theta) / sin(theta_0)
+    f32 s1 = sin_theta / sin_theta_0;
+	
+    return Q4Create(
+					(v0.x * s0) + (v1.x * s1),
+					(v0.y * s0) + (v1.y * s1),
+					(v0.z * s0) + (v1.z * s1),
+					(v0.w * s0) + (v1.w * s1));
+}
+
+/**
+ * @brief Converts provided degrees to radians.
+ * 
+ * @param degrees The degrees to be converted.
+ * @return The amount in radians.
+ */
+ELSA_INLINE f32 DegToRad(f32 degrees) {
+	return degrees * E_DEG2RAD_MULTIPLIER;
+}
+
+/**
+ * @brief Converts provided radians to degrees.
+ * 
+ * @param radians The radians to be converted.
+ * @return The amount in degrees.
+ */
+ELSA_INLINE f32 RadToDeg(f32 radians) {
+	return radians * E_RAD2DEG_MULTIPLIER;
+}
 
 #endif
