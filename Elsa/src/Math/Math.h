@@ -1,7 +1,8 @@
 /**
  * @file Math.h
  * @author Milo Heinrich (MikuoH15TH@gmail.com)
- * @brief Hosts creation and destruction methods for the renderer backend.
+ * @brief This file contains definitions for various important constant values
+ * as well as functions for many common math types.
  * @version 1.0
  * @date 2022-06-26
  */
@@ -10,6 +11,8 @@
 
 #include <Defines.h>
 #include <Math/MathTypes.h>
+#include <math.h>
+#include <stdlib.h>
 
 /** @brief An approximate representation of PI. */
 #define E_PI 3.14159265358979323846f
@@ -69,7 +72,9 @@
  * @param x The number to calculate the sine of.
  * @return The sine of x.
  */
-ELSA_API f32 Sin(f32 x);
+ELSA_INLINE f32 Sin(f32 x) {
+	return sinf(x);
+}
 
 /**
  * @brief Calculates the cosine of x.
@@ -77,7 +82,9 @@ ELSA_API f32 Sin(f32 x);
  * @param x The number to calculate the cosine of.
  * @return The cosine of x.
  */
-ELSA_API f32 Cos(f32 x);
+ELSA_INLINE f32 Cos(f32 x) {
+	return cosf(x);
+}
 
 /**
  * @brief Calculates the tangent of x.
@@ -85,7 +92,9 @@ ELSA_API f32 Cos(f32 x);
  * @param x The number to calculate the tangent of.
  * @return The tangent of x.
  */
-ELSA_API f32 Tan(f32 x);
+ELSA_INLINE f32 Tan(f32 x) {
+	return tanf(x);
+}
 
 /**
  * @brief Calculates the arc cosine of x.
@@ -93,7 +102,9 @@ ELSA_API f32 Tan(f32 x);
  * @param x The number to calculate the arc cosine of.
  * @return The arc cosine of x.
  */
-ELSA_API f32 Acos(f32 x);
+ELSA_INLINE f32 Acos(f32 x) {
+	return acosf(x);
+}
 
 /**
  * @brief Calculates the arc sine of x.
@@ -101,7 +112,9 @@ ELSA_API f32 Acos(f32 x);
  * @param x The number to calculate the arc sine of.
  * @return The arc sine of x.
  */
-ELSA_API f32 Asin(f32 x);
+ELSA_INLINE f32 Asin(f32 x) {
+	return asinf(x);
+}
 
 /**
  * @brief Calculates the arc tangent of x.
@@ -109,7 +122,9 @@ ELSA_API f32 Asin(f32 x);
  * @param x The number to calculate the arc tangent of.
  * @return The arc tangent of x.
  */
-ELSA_API f32 Asin(f32 x);
+ELSA_INLINE f32 Atan(f32 x) {
+	return atanf(x);
+}
 
 /**
  * @brief Calculates the square root of x.
@@ -117,7 +132,9 @@ ELSA_API f32 Asin(f32 x);
  * @param x The number to calculate the square root of.
  * @return The square root of x.
  */
-ELSA_API f32 Sqrt(f32 x);
+ELSA_INLINE f32 Sqrt(f32 x) {
+	return sqrtf(x);
+}
 
 /**
  * @brief Calculates the absolute value of x.
@@ -125,46 +142,18 @@ ELSA_API f32 Sqrt(f32 x);
  * @param x The number to get the absolute value of.
  * @return The absolute value of x.
  */
-ELSA_API f32 Abs(f32 x);
+ELSA_INLINE f32 Abs(f32 x) {
+	return fabsf(x);
+}
 
 /**
  * @brief Indicates if the value is a power of 2. 0 is considered _not_ a power of 2.
  * @param value The value to be interpreted.
  * @returns True if a power of 2, otherwise false.
  */
-ELSA_API b8 IsPowerOf2(u64 value);
-
-/**
- * @brief Returns a random integer.
- * 
- * @return A random integer.
- */
-ELSA_API i32 Random();
-
-/**
- * @brief Returns a random integer that is within the given range (inclusive).
- * 
- * @param min The minimum of the range.
- * @param max The maximum of the range.
- * @return A random integer.
- */
-ELSA_API i32 RandomInRange(i32 min, i32 max);
-
-/**
- * @brief Returns a random floating-point number.
- * 
- * @return A random floating-point number.
- */
-ELSA_API f32 FRandom();
-
-/**
- * @brief Returns a random floating-point number that is within the given range (inclusive).
- * 
- * @param min The minimum of the range.
- * @param max The maximum of the range.
- * @return A random floating-point number.
- */
-ELSA_API f32 FRandomInRange(f32 min, f32 max);
+ELSA_INLINE b8 IsPowerOf2(u64 value) {
+	return (value != 0) && ((value & (value - 1)) == 0);
+}
 
 // ------------------------------------------
 // Vector 2

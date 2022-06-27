@@ -9,7 +9,7 @@ FOR /R %%f in (*.c) do (
 )
 
 SET Assembly=App
-SET CompilerFlags=-g 
+SET CompilerFlags=-g -MD -Werror=vla -Wno-missing-braces -fdeclspec
 SET IncludeFlags=-Isrc -I../Elsa/src
 SET LinkerFlags=-luser32 -lgdi32 -lkernel32 -L../bin/ -lElsa.lib
 SET Defines=-D_DEBUG 

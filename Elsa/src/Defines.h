@@ -101,10 +101,13 @@ typedef i8 b8;
 // Inline
 #if defined(__clang__) || defined(__gcc__)
 #define ELSA_INLINE __attribute__((always_inline)) inline
+#define ELSA_NO_INLINE __attribute__((noinline))
 #elif defined(_MSC_VER)
 #define ELSA_INLINE __forceinline
+#define ELSA_NO_INLINE __declspec(noinline)
 #else
 #define ELSA_INLINE static inline
+#define ELSA_NO_INLINE 
 #endif
 
 #endif
