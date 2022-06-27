@@ -3,6 +3,7 @@
 #include <Containers/Darray.h>
 #include <Platform/Platform.h>
 #include <Core/Logger.h>
+#include <Core/MemTracker.h>
 
 #include <string.h>
 
@@ -161,7 +162,11 @@ b8 SelectPhysicalDevice(VulkanContext* context)
         requirements.Compute = true;
         requirements.Transfer = true;
         requirements.SamplerAnisotropy = true;
-        requirements.DiscreteGPU = true;
+#ifdef ELSA_PLATFORM_MACOS
+		requirements.DiscreteGPU = false;
+#else
+		requirements.DiscreteGPU = true;
+#endif
         requirements.DeviceExtensionNames = Darray_Create(const char*);
         Darray_Push(requirements.DeviceExtensionNames, &VK_KHR_SWAPCHAIN_EXTENSION_NAME);
 		
@@ -223,13 +228,13 @@ b8 VulkanDeviceCreate(VulkanContext* context)
     VkExtensionProperties* available_extensions = 0;
     VK_CHECK(vkEnumerateDeviceExtensionProperties(context->Device.PhysicalDevice, 0, &available_extension_count, 0));
     if (available_extension_count != 0) {
-        available_extensions = PlatformAlloc(sizeof(VkExtensionProperties) * available_extension_count);
+        available_extensions = MemoryTrackerAlloc(sizeof(VkExtensionProperties) * available_extension_count, MEMORY_TAG_RENDERER);
         VK_CHECK(vkEnumerateDeviceExtensionProperties(context->Device.PhysicalDevice, 0, &available_extension_count, available_extensions));
         for (u32 i = 0; i < available_extension_count; ++i) {
             // TODO: Add extensions
         }
     }
-    PlatformFree(available_extensions);
+    MemoryTrackerFree(available_extensions, sizeof(VkExtensionProperties) * available_extension_count, MEMORY_TAG_RENDERER);
 	
     const char** extension_names = (const char* [1]){VK_KHR_SWAPCHAIN_EXTENSION_NAME};
 	
