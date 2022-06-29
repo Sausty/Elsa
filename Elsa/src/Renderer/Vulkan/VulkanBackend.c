@@ -12,6 +12,10 @@
 
 static VulkanContext context;
 
+/*
+TODO(milo): Load vulkan functions dynamically
+*/
+
 b8 VulkanRendererBackendInit(RendererBackend* backend)
 {
     context.FramebufferWidth = 1280;

@@ -17,6 +17,21 @@
 #include <vulkan/vulkan_win32.h>
 #include <Renderer/Vulkan/VulkanTypes.h>
 
+/*
+TODO(milo): Threading system, need to implement threads, mutex and locks for both Windows
+and MacOS. Windows will use the Win32 API, and MacOS will use the pthread library.
+At least pthread is available on linux, so that it will facilitate the porting
+of the engine to linux once I have a machine that runs it.
+
+TODO(milo): Maybe follow the handmade guideline and make my own audio system? It would
+allow for more control with everything related to spacial audio etc... but
+that also means having more cross platform code to port.
+
+TODO(milo): Implement a good and working filesystem
+
+TODO(milo): Add a dynamic library wrapper for .dylib, .dll and .so
+*/
+
 typedef struct Gamepad {
     XINPUT_STATE State;
     b8 Connected;
@@ -25,10 +40,10 @@ typedef struct Gamepad {
 typedef struct PlatformState {
     HINSTANCE hInstance;
     HWND hwnd;
-
+	
     ApplicationState* app_state;
     HMODULE XInputLib;
-
+	
     Gamepad Pads[4];
 } PlatformState;
 
@@ -74,7 +89,7 @@ b8 PlatformInit(ApplicationState* application_state)
 {
     platform_state.hInstance = GetModuleHandle(NULL);
     platform_state.app_state = application_state;
-
+	
     platform_state.XInputLib = LoadLibraryA("xinput1_4.dll");
     if (!platform_state.XInputLib) {
         ELSA_FATAL("Failed to load XInput dll!");
@@ -95,7 +110,7 @@ b8 PlatformInit(ApplicationState* application_state)
         ELSA_FATAL("Failed to load the XInputGetBatteryInformation function!");
         return false;
     }
-
+	
     HICON icon = LoadIcon(platform_state.hInstance, IDI_APPLICATION);
     
     WNDCLASSA wc;
@@ -109,62 +124,62 @@ b8 PlatformInit(ApplicationState* application_state)
     wc.hCursor = LoadCursor(NULL, IDC_ARROW);
     wc.hbrBackground = NULL;
     wc.lpszClassName = "ElsaWindowClass";
-
+	
     if (!RegisterClassA(&wc)) {
         MessageBoxA(0, "Window registration failed", "Error", MB_ICONEXCLAMATION | MB_OK);
         return false;
     }
-
+	
     // Create window
     u32 client_x = application_state->PosX;
     u32 client_y = application_state->PosY;
     u32 client_width = application_state->Width;
     u32 client_height = application_state->Height;
-
+	
     u32 window_x = client_x;
     u32 window_y = client_y;
     u32 window_width = client_width;
     u32 window_height = client_height;
-
+	
     u32 window_style = WS_OVERLAPPED | WS_SYSMENU | WS_CAPTION;
     u32 window_ex_style = WS_EX_APPWINDOW;
-
+	
     window_style |= WS_MAXIMIZEBOX;
     window_style |= WS_MINIMIZEBOX;
     window_style |= WS_THICKFRAME;
-
+	
     // Obtain the size of the border.
     RECT border_rect = {0, 0, 0, 0};
     AdjustWindowRectEx(&border_rect, window_style, 0, window_ex_style);
-
+	
     // In this case, the border rectangle is negative.
     window_x += border_rect.left;
     window_y += border_rect.top;
-
+	
     // Grow by the size of the OS border.
     window_width += border_rect.right - border_rect.left;
     window_height += border_rect.bottom - border_rect.top;
-
+	
     HWND handle = CreateWindowExA(
-        window_ex_style, "ElsaWindowClass", application_state->Name,
-        window_style, window_x, window_y, window_width, window_height,
-        0, 0, platform_state.hInstance, 0);
-
+								  window_ex_style, "ElsaWindowClass", application_state->Name,
+								  window_style, window_x, window_y, window_width, window_height,
+								  0, 0, platform_state.hInstance, 0);
+	
     if (handle == 0) {
         MessageBoxA(NULL, "Window creation failed!", "Error!", MB_ICONEXCLAMATION | MB_OK);
-
+		
         ELSA_FATAL("Window creation failed!");
         return false;
     } else {
         platform_state.hwnd = handle;
     }
-
+	
     b8 should_activate = true;  
     i32 show_window_command_flags = should_activate ? SW_SHOW : SW_SHOWNOACTIVATE;
     // If initially minimized, use SW_MINIMIZE : SW_SHOWMINNOACTIVE;
     // If initially maximized, use SW_SHOWMAXIMIZED : SW_MAXIMIZE
     ShowWindow(platform_state.hwnd, show_window_command_flags);
-
+	
     return true;
 }
 
@@ -172,7 +187,7 @@ void PlatformExit()
 {
     if (platform_state.hwnd)
         DestroyWindow(platform_state.hwnd);
-
+	
     FreeLibrary(platform_state.XInputLib);
 }
 
@@ -182,10 +197,10 @@ void PlatformUpdateGamepads()
     {
         XINPUT_STATE state;
         ZeroMemory(&state, sizeof(XINPUT_STATE));
-
+		
         DWORD result = XInputGetStateProc(i, &state);
         b8 connected = ERROR_SUCCESS == result;
-
+		
         if (connected != platform_state.Pads[i].Connected) {
             Event event;
             event.data.u16[0] = i;
@@ -194,17 +209,17 @@ void PlatformUpdateGamepads()
             else
                 EventFire(EVENT_CODE_GAMEPAD_DISCONNECTED, 0, event);
         }
-
+		
         platform_state.Pads[i].Connected = connected;
-
+		
         if (connected)
         {
             XINPUT_BATTERY_INFORMATION battery;
             PlatformZeroMemory(&battery, sizeof(battery));
             XInputGetBatteryInformationProc(i, BATTERY_DEVTYPE_GAMEPAD, &battery);
-
+			
             InputProcessGamepadBattery(i, XInputBatteryToFloat(battery.BatteryLevel));
-
+			
             InputProcessGamepadButton(i, GAMEPAD_A,              (state.Gamepad.wButtons & XINPUT_GAMEPAD_A) != 0);
             InputProcessGamepadButton(i, GAMEPAD_B,              (state.Gamepad.wButtons & XINPUT_GAMEPAD_B) != 0);
             InputProcessGamepadButton(i, GAMEPAD_X,              (state.Gamepad.wButtons & XINPUT_GAMEPAD_X) != 0);
@@ -219,25 +234,25 @@ void PlatformUpdateGamepads()
             InputProcessGamepadButton(i, GAMEPAD_LEFT_SHOULDER,  (state.Gamepad.wButtons & XINPUT_GAMEPAD_LEFT_SHOULDER) != 0);
             InputProcessGamepadButton(i, GAMEPAD_RIGHT_THUMB,    (state.Gamepad.wButtons & XINPUT_GAMEPAD_RIGHT_THUMB) != 0);
             InputProcessGamepadButton(i, GAMEPAD_RIGHT_SHOULDER, (state.Gamepad.wButtons & XINPUT_GAMEPAD_RIGHT_SHOULDER) != 0);
-
+			
             f32 left_trigger = (f32)state.Gamepad.bLeftTrigger / 255;
             f32 right_trigger = (f32)state.Gamepad.bRightTrigger / 255;
-
+			
             InputProcessGamepadTrigger(i, left_trigger, GAMEPAD_ANALOG_LEFT);
             InputProcessGamepadTrigger(i, right_trigger, GAMEPAD_ANALOG_RIGHT);
-
+			
             f32 normLX = Normalize((f32)state.Gamepad.sThumbLX, -32767, 32767);
             f32 normLY = Normalize((f32)state.Gamepad.sThumbLY, -32767, 32767);
-
+			
             f32 normRX = Normalize((f32)state.Gamepad.sThumbRX, -32767, 32767);
             f32 normRY = Normalize((f32)state.Gamepad.sThumbRY, -32767, 32767);
-
+			
             f32 lx = 0.0f;
             f32 ly = 0.0f;
-
+			
             f32 rx = 0.0f;
             f32 ry = 0.0f;
-
+			
             if (XINPUT_GAMEPAD_LEFT_THUMB_DEADZONE <= 1.0f || XINPUT_GAMEPAD_RIGHT_THUMB_DEADZONE <= 1.0f)
             {
                 lx = ApplyDeadzone(normLX,  1.0f, XINPUT_GAMEPAD_LEFT_THUMB_DEADZONE);
@@ -252,22 +267,22 @@ void PlatformUpdateGamepads()
                 rx = ApplyDeadzone(normRX,  1.0f, Normalize(XINPUT_GAMEPAD_LEFT_THUMB_DEADZONE, SHRT_MIN, SHRT_MAX));
                 ry = ApplyDeadzone(normRY,  1.0f, Normalize(XINPUT_GAMEPAD_RIGHT_THUMB_DEADZONE, SHRT_MIN, SHRT_MAX));
             }
-
+			
             InputProcessGamepadJoystick(i, lx, ly, GAMEPAD_ANALOG_LEFT);
             InputProcessGamepadJoystick(i, rx, ry, GAMEPAD_ANALOG_RIGHT);
-
+			
             XINPUT_VIBRATION vibration;
             f32 rightSpeed;
             f32 leftSpeed;
             InputGetGamepadVibration(i, &rightSpeed, &leftSpeed);
-
+			
             u16 right = rightSpeed * 65335.0f;
             u16 left = leftSpeed * 65335.0f;
             vibration.wRightMotorSpeed = right;
             vibration.wLeftMotorSpeed = left;
-
+			
             XInputSetStateProc(i, &vibration);
-
+			
             platform_state.Pads[i].State = state;
         }
     }
@@ -280,7 +295,7 @@ b8 PlatformPumpMessages()
         TranslateMessage(&msg);
         DispatchMessageA(&msg);
     }
-
+	
     return true;
 }
 
@@ -359,7 +374,7 @@ LRESULT CALLBACK PlatformProcessMessages(HWND hwnd, u32 msg, WPARAM w_param, LPA
             GetClientRect(hwnd, &r);
             u32 width = r.right - r.left;
             u32 height = r.bottom - r.top;
-
+			
             Event data = {};
             data.data.u16[0] = (u16)width;
             data.data.u16[1] = (u16)height;
@@ -371,9 +386,9 @@ LRESULT CALLBACK PlatformProcessMessages(HWND hwnd, u32 msg, WPARAM w_param, LPA
         case WM_SYSKEYUP: {
             b8 pressed = (msg == WM_KEYDOWN || msg == WM_SYSKEYDOWN);
             Keys key = (u16)w_param;
-
+			
             b8 is_extended = (HIWORD(l_param) & KF_EXTENDED) == KF_EXTENDED;
-
+			
             if (w_param == VK_MENU) {
                 key = is_extended ? KEY_RALT : KEY_LALT;
             } else if (w_param == VK_SHIFT) {
@@ -383,16 +398,16 @@ LRESULT CALLBACK PlatformProcessMessages(HWND hwnd, u32 msg, WPARAM w_param, LPA
             } else if (w_param == VK_CONTROL) {
                 key = is_extended ? KEY_RCONTROL : KEY_LCONTROL;
             }
-
+			
             InputProcessKey(key, pressed);
-
+			
             return 0;
         }
         case WM_MOUSEMOVE: {
             // Mouse move
             i32 x_position = GET_X_LPARAM(l_param);
             i32 y_position = GET_Y_LPARAM(l_param);
-
+			
             InputProcessMouseMove(x_position, y_position);
         } break;
         case WM_MOUSEWHEEL: {
@@ -413,25 +428,25 @@ LRESULT CALLBACK PlatformProcessMessages(HWND hwnd, u32 msg, WPARAM w_param, LPA
             switch (msg) {
                 case WM_LBUTTONDOWN:
                 case WM_LBUTTONUP:
-                    mouse_button = BUTTON_LEFT;
-                    break;
+				mouse_button = BUTTON_LEFT;
+				break;
                 case WM_MBUTTONDOWN:
                 case WM_MBUTTONUP:
-                    mouse_button = BUTTON_MIDDLE;
-                    break;
+				mouse_button = BUTTON_MIDDLE;
+				break;
                 case WM_RBUTTONDOWN:
                 case WM_RBUTTONUP:
-                    mouse_button = BUTTON_RIGHT;
-                    break;
+				mouse_button = BUTTON_RIGHT;
+				break;
             }
-
+			
             // Pass over to the input subsystem.
             if (mouse_button != BUTTON_MAX_BUTTONS) {
                 InputProcessButton(mouse_button, pressed);
             }
         } break;
     }
-
+	
     return DefWindowProcA(hwnd, msg, w_param, l_param);
 }
 
@@ -464,13 +479,13 @@ b8 PlatformCreateVulkanSurface(struct VulkanContext* context)
     VkWin32SurfaceCreateInfoKHR create_info = {VK_STRUCTURE_TYPE_WIN32_SURFACE_CREATE_INFO_KHR};
     create_info.hinstance = platform_state.hInstance;
     create_info.hwnd = platform_state.hwnd;
-
+	
     VkResult result = vkCreateWin32SurfaceKHR(context->Instance, &create_info, NULL, &context->Surface);
     if (result != VK_SUCCESS) {
         ELSA_FATAL("Vulkan surface creation failed.");
         return false;
     }
-
+	
     return true;
 }
 
