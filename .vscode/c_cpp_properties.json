@@ -5,7 +5,6 @@
             "includePath": [
                 "${default}",
                 "${workspaceFolder}/Elsa/src",
-                "${workspaceFolder}/Elsa/Vendor",
                 "${VULKAN_SDK}/include"
             ],
             "defines": [
@@ -23,8 +22,7 @@
             "name": "Mac",
             "includePath": [
                 "${default}",
-                "${workspaceFolder}/Elsa/src",
-                "${workspaceFolder}/Elsa/Vendor"
+                "${workspaceFolder}/Elsa/src"
             ],
             "defines": [
                 "_DEBUG",
