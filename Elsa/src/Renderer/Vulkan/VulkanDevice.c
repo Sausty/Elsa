@@ -24,7 +24,8 @@ typedef struct VulkanPhysicalDeviceQueueFamilyInfo {
     u32 TransferFamilyIndex;
 } VulkanPhysicalDeviceQueueFamilyInfo;
 
-b8 PhysicalDeviceMeetsRequirements(VkPhysicalDevice device, VkSurfaceKHR surface, const VkPhysicalDeviceProperties* properties, const VkPhysicalDeviceFeatures* features, const VulkanPhysicalDeviceRequirements* requirements, VulkanPhysicalDeviceQueueFamilyInfo* out_queue_info)
+b8 PhysicalDeviceMeetsRequirements(VkPhysicalDevice device, VkSurfaceKHR surface, const VkPhysicalDeviceProperties* properties, const VkPhysicalDeviceFeatures* features, const VulkanPhysicalDeviceRequirements* requirements, VulkanPhysicalDeviceQueueFamilyInfo* out_queue_info,
+								   VulkanSwapchainSupport* out_swapchain_support)
 {
 	if (requirements->DiscreteGPU) {
         if (properties->deviceType != VK_PHYSICAL_DEVICE_TYPE_DISCRETE_GPU) {
@@ -73,6 +74,21 @@ b8 PhysicalDeviceMeetsRequirements(VkPhysicalDevice device, VkSurfaceKHR surface
         (!requirements->Graphics || (requirements->Graphics && out_queue_info->GraphicsFamilyIndex != -1)) &&
         (!requirements->Compute || (requirements->Compute && out_queue_info->ComputeFamilyIndex != -1)) &&
         (!requirements->Transfer || (requirements->Transfer && out_queue_info->TransferFamilyIndex != -1))) {
+		
+		VulkanDeviceQuerySwapchainSupport(
+										  device,
+										  surface,
+										  out_swapchain_support);
+		
+        if (out_swapchain_support->FormatCount < 1 || out_swapchain_support->PresentModeCount < 1) {
+            if (out_swapchain_support->Formats) {
+                MemoryTrackerFree(out_swapchain_support->Formats, sizeof(VkSurfaceFormatKHR) * out_swapchain_support->FormatCount, MEMORY_TAG_RENDERER);
+            }
+            if (out_swapchain_support->PresentModes) {
+                MemoryTrackerFree(out_swapchain_support->PresentModes, sizeof(VkPresentModeKHR) * out_swapchain_support->PresentModeCount, MEMORY_TAG_RENDERER);
+            }
+            return false;
+        }
 		
         // Device extensions.
         if (requirements->DeviceExtensionNames) {
@@ -177,7 +193,8 @@ b8 SelectPhysicalDevice(VulkanContext* context)
 													&properties,
 													&features,
 													&requirements,
-													&queue_info);
+													&queue_info,
+													&context->Device.SwapchainSupport);
 		
         if (result) {
             context->Device.PhysicalDevice = physical_devices[i];
@@ -280,5 +297,54 @@ b8 VulkanDeviceCreate(VulkanContext* context)
 
 void VulkanDeviceDestroy(VulkanContext* context)
 {
+	if (context->Device.SwapchainSupport.Formats)
+		MemoryTrackerFree(context->Device.SwapchainSupport.Formats, sizeof(VkSurfaceFormatKHR) * context->Device.SwapchainSupport.FormatCount, MEMORY_TAG_RENDERER);
+	if (context->Device.SwapchainSupport.PresentModes)
+		MemoryTrackerFree(context->Device.SwapchainSupport.PresentModes, sizeof(VkPresentModeKHR) * context->Device.SwapchainSupport.PresentModeCount, MEMORY_TAG_RENDERER);
+	
     vkDestroyDevice(context->Device.LogicalDevice, NULL);
+}
+
+void VulkanDeviceQuerySwapchainSupport(VkPhysicalDevice physical_device, VkSurfaceKHR surface, VulkanSwapchainSupport* out_support_info)
+{
+	// Surface capabilities
+    VK_CHECK(vkGetPhysicalDeviceSurfaceCapabilitiesKHR(
+													   physical_device,
+													   surface,
+													   &out_support_info->Capabilities));
+	
+    // Surface formats
+    VK_CHECK(vkGetPhysicalDeviceSurfaceFormatsKHR(
+												  physical_device,
+												  surface,
+												  &out_support_info->FormatCount,
+												  0));
+	
+    if (out_support_info->FormatCount != 0) {
+        if (!out_support_info->Formats) {
+            out_support_info->Formats = MemoryTrackerAlloc(sizeof(VkSurfaceFormatKHR) * out_support_info->FormatCount, MEMORY_TAG_RENDERER);
+        }
+        VK_CHECK(vkGetPhysicalDeviceSurfaceFormatsKHR(
+													  physical_device,
+													  surface,
+													  &out_support_info->FormatCount,
+													  out_support_info->Formats));
+    }
+	
+    // Present modes
+    VK_CHECK(vkGetPhysicalDeviceSurfacePresentModesKHR(
+													   physical_device,
+													   surface,
+													   &out_support_info->PresentModeCount,
+													   0));
+    if (out_support_info->PresentModeCount != 0) {
+        if (!out_support_info->PresentModes) {
+            out_support_info->PresentModes = MemoryTrackerAlloc(sizeof(VkPresentModeKHR) * out_support_info->PresentModeCount, MEMORY_TAG_RENDERER);
+        }
+        VK_CHECK(vkGetPhysicalDeviceSurfacePresentModesKHR(
+														   physical_device,
+														   surface,
+														   &out_support_info->PresentModeCount,
+														   out_support_info->PresentModes));
+    }
 }

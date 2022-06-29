@@ -13,5 +13,6 @@
 
 b8 VulkanDeviceCreate(VulkanContext* context);
 void VulkanDeviceDestroy(VulkanContext* context);
+void VulkanDeviceQuerySwapchainSupport(VkPhysicalDevice physical_device, VkSurfaceKHR surface, VulkanSwapchainSupport* out_support_info);
 
 #endif

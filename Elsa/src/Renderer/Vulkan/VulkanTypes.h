@@ -22,9 +22,18 @@
 
 #define VK_CHECK(error) ELSA_ASSERT(error == VK_SUCCESS)
 
+typedef struct VulkanSwapchainSupport {
+	VkSurfaceCapabilitiesKHR Capabilities;
+	u32 FormatCount;
+	VkSurfaceFormatKHR* Formats;
+	u32 PresentModeCount;
+	VkPresentModeKHR* PresentModes;
+} VulkanSwapchainSupport;
+
 typedef struct VulkanDevice {
     VkPhysicalDevice PhysicalDevice;
     VkDevice LogicalDevice;
+	VulkanSwapchainSupport SwapchainSupport;
 	
     i32 GraphicsQueueIndex;
     i32 ComputeQueueIndex;
