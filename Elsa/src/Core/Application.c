@@ -3,7 +3,7 @@
 #include <Core/Event.h>
 #include <Core/Logger.h>
 #include <Core/MemTracker.h>
-#include <Audio/Audio.h>
+#include <Audio/AudioFrontend.h>
 #include <Platform/Platform.h>
 #include <Renderer/RendererFrontend.h>
 
@@ -74,8 +74,8 @@ b8 ApplicationCreate(struct Game* game)
         ELSA_FATAL("PlatformInit failed. Shutting down...");
         return false;
     }
-    if (!AudioInit()) {
-        ELSA_FATAL("AudioInit failed. Shutting down...");
+    if (!AudioFrontendInit()) {
+        ELSA_FATAL("AudioFrontendInit failed. Shutting down...");
         return false;
     }
     if (!RendererFrontendInit(app_state.Name)) {
@@ -106,7 +106,7 @@ b8 ApplicationRun()
         }
 		
         PlatformUpdateGamepads();
-        AudioUpdate();
+		AudioFrontendUpdate();
 		
         if (!app_state.game->Update(app_state.game)) {
             ELSA_ERROR("app_state.game->Update failed.");
@@ -134,7 +134,7 @@ b8 ApplicationRun()
     EventUnregister(EVENT_CODE_APPLICATION_QUIT, 0, ApplicationOnEvent);
 	
     RendererFrontendShutdown();
-    AudioExit();
+    AudioFrontendShutdown();
     PlatformExit();
 	MemoryTrackerShutdown();
 	
