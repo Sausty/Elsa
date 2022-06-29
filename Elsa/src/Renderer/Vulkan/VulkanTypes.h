@@ -9,10 +9,10 @@
 #define ELSA_VULKAN_TYPES_H
 
 #include <Defines.h>
+#include <Core/Asserts.h>
 
 #include <vulkan/vulkan.h>
 
-// TODO(milo): Add assertions
 // TODO(milo): Image
 // TODO(milo): Swapchain
 // TODO(milo): Buffer
@@ -20,7 +20,7 @@
 // TODO(milo): Graphics and compute pipelines
 // TODO(milo): Shader system
 
-#define VK_CHECK(error) error
+#define VK_CHECK(error) ELSA_ASSERT(error == VK_SUCCESS)
 
 typedef struct VulkanDevice {
     VkPhysicalDevice PhysicalDevice;

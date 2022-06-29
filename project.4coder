@@ -38,7 +38,7 @@ command_list = {
 	},
 	{
 		.name = "run",
-		.out = "*compilation*", .footer_panel = true, .save_dirty_files = false, .cursor_at_end = false,
+		.out = "*compilation*", .footer_panel = true, .save_dirty_files = true, .cursor_at_end = true,
 		.cmd = { {run_win32, .os = "win"}, {run_macos, .os = "mac"}, },	
 	},
 };

@@ -49,7 +49,7 @@ b8 VulkanRendererBackendInit(RendererBackend* backend)
 	
     // Obtain a list of available validation layers
     u32 available_layer_count = 0;
-    VK_CHECK(vkEnumerateInstanceLayerProperties(&available_layer_count, 0));
+    VK_CHECK(vkEnumerateInstanceLayerProperties(&available_layer_count, NULL));
     VkLayerProperties* available_layers = Darray_Reserve(VkLayerProperties, available_layer_count);
     VK_CHECK(vkEnumerateInstanceLayerProperties(&available_layer_count, available_layers));
 	
