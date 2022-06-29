@@ -13,6 +13,7 @@
 
 #include <vulkan/vulkan.h>
 
+// TODO(milo): GPU memory allocator using pool allocation
 // TODO(milo): Image
 // TODO(milo): Swapchain
 // TODO(milo): Buffer

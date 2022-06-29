@@ -27,8 +27,6 @@ TODO(milo): Maybe follow the handmade guideline and make my own audio system? It
 allow for more control with everything related to spacial audio etc... but
 that also means having more cross platform code to port.
 
-TODO(milo): Implement a good and working filesystem
-
 TODO(milo): Add a dynamic library wrapper for .dylib, .dll and .so
 */
 
@@ -87,7 +85,7 @@ f32 ApplyDeadzone(f32 value, f32 maxValue, f32 deadzone)
 
 b8 PlatformInit(ApplicationState* application_state)
 {
-    platform_state.hInstance = GetModuleHandle(NULL);
+	platform_state.hInstance = GetModuleHandle(NULL);
     platform_state.app_state = application_state;
 	
     platform_state.XInputLib = LoadLibraryA("xinput1_4.dll");
