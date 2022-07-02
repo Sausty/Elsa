@@ -1,7 +1,7 @@
 /**
  * @file AudioTypes.h
  * @author Milo Heinrich (MikuoH15TH@gmail.com)
- * @brief This file contains type definitions regarding audio data.
+ * @brief This file contains type definitions regarding frontend audio data.
  * @version 1.0
  * @date 2022-07-02
  */

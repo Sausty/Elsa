@@ -1,7 +1,7 @@
 /**
  * @file AudioTypes.h
  * @author Milo Heinrich (MikuoH15TH@gmail.com)
- * @brief This file contains type definitions regarding audio data..
+ * @brief This file contains type definitions regarding backend audio data.
  * @version 1.0
  * @date 2022-06-29
  */
@@ -18,6 +18,16 @@ typedef enum AudioBackendAPI {
 } AudioBackendAPI;
 
 /**
+* @brief A structure containing details about the audio device.
+*/
+typedef struct AudioDetails {
+	/** @brief The sample rate of the device */
+	u32 SampleRate;
+	/** @brief The channel count of the device */
+	u32 ChannelCount;
+} AudioDetails;
+
+/**
  * @brief A generic "interface" for the backend. The audio backend
  * is what is responsible for making calls to the audio API such as
  * XAudio2 or AVFoundation. Each of these should implement this interface.
@@ -26,6 +36,7 @@ typedef enum AudioBackendAPI {
  */
 typedef struct AudioBackend {
 	AudioBackendAPI API;
+	AudioDetails Details;
 	
 	/**
      * @brief Initializes the audio backend.
