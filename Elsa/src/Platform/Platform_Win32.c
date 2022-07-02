@@ -23,10 +23,6 @@ and MacOS. Windows will use the Win32 API, and MacOS will use the pthread librar
 At least pthread is available on linux, so that it will facilitate the porting
 of the engine to linux once I have a machine that runs it.
 
-TODO(milo): Maybe follow the handmade guideline and make my own audio system? It would
-allow for more control with everything related to spacial audio etc... but
-that also means having more cross platform code to port.
-
 TODO(milo): Add a dynamic library wrapper for .dylib, .dll and .so
 */
 

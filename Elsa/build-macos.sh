@@ -2,7 +2,7 @@ set echo on
 
 mkdir -p ../bin
 
-cFilenames=$(find . -type f -name "*.c" -o -name "*.m")
+cFilenames=$(find . -type f -name "*.c" -o -name "*.m" -name "*.cpp")
 
 Assembly="Elsa"
 CompilerFlags="-g -shared -fdeclspec -fPIC -fno-objc-arc -fsanitize=address"

@@ -10,9 +10,9 @@ b8 CreateGame(Game* out_game, int argc, char** argv)
     out_game->AppConfig.Width = 1280;
     out_game->AppConfig.Height = 720;
 #ifdef ELSA_PLATFORM_WINDOWS
-	out_game->AppConfig.Name = "Elsa Engine | <VK>";
+	out_game->AppConfig.Name = "Elsa Engine | <VK> | <XAUDIO2>";
 #elif ELSA_PLATFORM_MACOS
-	out_game->AppConfig.Name = "Elsa Engine | <MTL>";
+	out_game->AppConfig.Name = "Elsa Engine | <MTL> | <AVFOUNDATION>";
 #endif
     out_game->Init = GameInit;
     out_game->Free = GameFree;
