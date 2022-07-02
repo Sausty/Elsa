@@ -1,6 +1,8 @@
 extern "C" {
 #include "XAudio2Backend.h"
+#include <Audio/AudioSource.h>
 #include <Core/Logger.h>
+#include <Core/MemTracker.h>
 }
 
 #if defined(ELSA_PLATFORM_WINDOWS)
@@ -13,11 +15,21 @@ extern "C" {
 #define AUDIO_CHANNELS XAUDIO2_DEFAULT_CHANNELS
 #define AUDIO_SAMPLE_RATE XAUDIO2_DEFAULT_SAMPLERATE
 
+using namespace DirectX;
+
 typedef struct XAudio2State {
 	IXAudio2* Device;
 	IXAudio2MasteringVoice* MasterVoice;
 	X3DAUDIO_HANDLE X3DInstance;
+	
+	u32 SampleRate;
+	u32 ChannelCount;
 } XAudio2State;
+
+typedef struct XAudio2Source {
+	IXAudio2SourceVoice* SourceVoice;
+	X3DAUDIO_EMITTER AudioEmitter;
+} XAudio2Source;
 
 static XAudio2State state;
 
@@ -64,6 +76,8 @@ b8 XAudio2BackendInit(AudioBackend* backend)
 	
 	backend->Details.SampleRate = details.InputSampleRate;
 	backend->Details.ChannelCount = details.InputChannels;
+	state.SampleRate = details.InputSampleRate;
+	state.ChannelCount = details.InputChannels;
 	
 	hr = X3DAudioInitialize(dwChannelMask, X3DAUDIO_SPEED_OF_SOUND, state.X3DInstance);
 	if (FAILED(hr)) {
@@ -71,12 +85,16 @@ b8 XAudio2BackendInit(AudioBackend* backend)
 		return false;
 	}
 	
+	// Launch message
+	ELSA_INFO("<XAudio2BackendInit> Using audio device with sample rate of %d and channel count of %d", details.InputSampleRate, details.InputChannels);
+	
 	return true;
 }
 
 void XAudio2BackendShutdown(AudioBackend* backend)
 {
 	state.MasterVoice->DestroyVoice();
+	state.Device->StopEngine();
 	state.Device->Release();
 	
 	CoUninitialize();
@@ -85,6 +103,49 @@ void XAudio2BackendShutdown(AudioBackend* backend)
 void XAudio2BackendUpdate(AudioBackend* backend)
 {
 	
+}
+
+b8 AudioSourceCreate(AudioSource* out_source)
+{
+	out_source->Looping = false;
+	out_source->Volume = 1.0f;
+	
+	out_source->Position = V3Zero();
+	out_source->Velocity = V3Zero();
+	
+	out_source->BackendData = MemoryTrackerAlloc(sizeof(XAudio2Source), MEMORY_TAG_AUDIO);
+	XAudio2Source* source = (XAudio2Source*)out_source->BackendData;
+	
+	// Source voice
+	
+	// Wave format
+	WAVEFORMATEX wave_format = {};
+	wave_format.wFormatTag = WAVE_FORMAT_PCM; // PCM audio format
+	wave_format.wBitsPerSample = 16; // s16
+	wave_format.nChannels = state.ChannelCount; // 2 channels commonly
+	wave_format.nSamplesPerSec = state.SampleRate; // 48khz or 48000 sample rate commonly
+	wave_format.nAvgBytesPerSec = (wave_format.wBitsPerSample * wave_format.nSamplesPerSec * wave_format.nChannels) / 8;
+	wave_format.nBlockAlign = (wave_format.nChannels * wave_format.wBitsPerSample) / 8; // 4 bytes commonly
+	wave_format.cbSize = 0;
+	
+	HRESULT hr = state.Device->CreateSourceVoice(&source->SourceVoice, (WAVEFORMATEX*)&wave_format, XAUDIO2_VOICE_USEFILTER, 1.0, NULL, NULL, NULL);
+	if (FAILED(hr))
+		return false;
+	
+	// Emitter
+	source->AudioEmitter.Position = XMFLOAT3(out_source->Position.x, out_source->Position.y, out_source->Position.z);
+	source->AudioEmitter.Velocity = XMFLOAT3(out_source->Velocity.x, out_source->Velocity.y, out_source->Velocity.z);
+	
+	return true;
+}
+
+void AudioSourceDestroy(AudioSource* source)
+{
+	XAudio2Source* backend = (XAudio2Source*)source->BackendData;
+	if (backend->SourceVoice)
+		backend->SourceVoice->DestroyVoice();
+	
+	MemoryTrackerFree(source->BackendData, sizeof(XAudio2Source), MEMORY_TAG_AUDIO);
 }
 
 #endif

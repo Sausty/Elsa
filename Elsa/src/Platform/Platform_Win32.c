@@ -174,6 +174,8 @@ b8 PlatformInit(ApplicationState* application_state)
     // If initially maximized, use SW_SHOWMAXIMIZED : SW_MAXIMIZE
     ShowWindow(platform_state.hwnd, show_window_command_flags);
 	
+	ELSA_INFO("<PlatformInit: WIN32> Platform initialised succesfully with window pointer: %p", (void*)platform_state.hwnd);
+	
     return true;
 }
 

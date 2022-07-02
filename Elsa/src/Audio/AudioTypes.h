@@ -5,8 +5,8 @@
  * @version 1.0
  * @date 2022-07-02
  */
-#ifndef ELSA_AUDIO_TYPES_H
-#define ELSA_AUDIO_TYPES_H
+#ifndef ELSA_AUDIO_FRONTEND_TYPES_H
+#define ELSA_AUDIO_FRONTEND_TYPES_H
 
 #include <Defines.h>
 #include <Math/Math.h>
@@ -22,6 +22,9 @@ typedef struct AudioSource {
 	v3f Position;
 	/** @brief The velocity of the audio source in space. */
 	v3f Velocity;
+	
+	/** @brief Opaque pointer that holds the backend data of the audio source. */
+	void* BackendData;
 } AudioSource;
 
 /** @brief A structure representing an audio listener. Only one listener is required per scene. */
@@ -34,6 +37,9 @@ typedef struct AudioListener {
 	v3f OrientationFront;
 	/** @brief The top orientation of the listener. */
 	v3f OrientationTop;
+	
+	/** @brief Opaque pointer that holds the backend data of the audio listener. */
+	void* BackendData;
 } AudioListener;
 
 #endif

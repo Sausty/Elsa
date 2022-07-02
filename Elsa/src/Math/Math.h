@@ -787,7 +787,7 @@ ELSA_INLINE v4f V4DivScalar(v4f left, f32 scalar) {
  * @param right The second vector.
  * @return The dot product. 
  */
-ELSA_API f32 V4Dot(v4f left, v4f right) {
+ELSA_INLINE f32 V4Dot(v4f left, v4f right) {
 	f32 result = 0.0f;
 #ifdef ELSA_USE_SSE
 	__m128 SSEResultOne = _mm_mul_ps(left.InternalElementsSSE, right.InternalElementsSSE);
@@ -1218,7 +1218,7 @@ ELSA_INLINE m4f M4LookAt(v3f eye, v3f center, v3f up) {
  * @param position The position to be used to create the matrix.
  * @return A newly created translation matrix.
  */
-ELSA_API m4f M4Translate(v3f position) {
+ELSA_INLINE m4f M4Translate(v3f position) {
 	m4f result = M4Identity();
 	result.Elements[3][0] = position.x;
     result.Elements[3][1] = position.y;
@@ -1232,7 +1232,7 @@ ELSA_API m4f M4Translate(v3f position) {
  * @param scale The 3-component scale.
  * @return A scale matrix.
  */
-ELSA_API m4f M4Scale(v3f scale) {
+ELSA_INLINE m4f M4Scale(v3f scale) {
 	m4f result = M4Identity();
 	result.Elements[0][0] = scale.x;
     result.Elements[1][1] = scale.y;
@@ -1247,7 +1247,7 @@ ELSA_API m4f M4Scale(v3f scale) {
 * @param axis The rotation axis.
  * @return A rotation matrix.
  */
-ELSA_API m4f M4Rotate(f32 angle, v3f axis) {
+ELSA_INLINE m4f M4Rotate(f32 angle, v3f axis) {
 	m4f result = M4Identity();
 	
 	axis = V3Normalized(axis);
@@ -1505,7 +1505,7 @@ ELSA_INLINE q4f Q4Inverse(q4f q) {
  * @param q The quaternion to be used.
  * @return A rotation matrix.
  */
-ELSA_API m4f Q4ToM4(q4f q) {
+ELSA_INLINE m4f Q4ToM4(q4f q) {
 	m4f Result = M4Identity();
 	q4f NormalizedQuaternion = Q4Normalize(q);
 	
