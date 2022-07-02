@@ -7,6 +7,16 @@ extern "C" {
 
 #if defined(ELSA_PLATFORM_WINDOWS)
 
+/*
+TODO(milo): Load audio files and play them
+
+TODO(milo): Loop and volume modifiers
+
+TODO(milo): Sound effects (high pass, low pass, reverb)
+
+TODO(milo): 3D spatialized audio (badass)
+*/
+
 #define WIN32_LEAN_AND_MEAN
 #include <Windows.h>
 #include <XAudio2.h>
@@ -15,9 +25,14 @@ extern "C" {
 #define AUDIO_CHANNELS XAUDIO2_DEFAULT_CHANNELS
 #define AUDIO_SAMPLE_RATE XAUDIO2_DEFAULT_SAMPLERATE
 
+typedef HRESULT (WINAPI* PFN_XAUDIO2_CREATE)(IXAudio2** ppXAudio2, UINT32 Flags, XAUDIO2_PROCESSOR XAudio2Processor);
+typedef HRESULT (WINAPI* PFN_X3DAUDIO_INITIALIZE)(UINT32 SpeakerChannelMask, FLOAT32 SpeedOfSound, X3DAUDIO_HANDLE Instance);
+
 using namespace DirectX;
 
 typedef struct XAudio2State {
+	HMODULE XAudioLib;
+	
 	IXAudio2* Device;
 	IXAudio2MasteringVoice* MasterVoice;
 	X3DAUDIO_HANDLE X3DInstance;
@@ -33,11 +48,31 @@ typedef struct XAudio2Source {
 
 static XAudio2State state;
 
+PFN_XAUDIO2_CREATE XAudio2CreateProc;
+PFN_X3DAUDIO_INITIALIZE X3DAudioInitializeProc;
+
 b8 XAudio2BackendInit(AudioBackend* backend)
 {
 	HRESULT hr = CoInitializeEx(NULL, COINIT_MULTITHREADED);
 	if (FAILED(hr)) {
 		ELSA_ERROR("Failed to initialize COM. Shutting down...");
+		return false;
+	}
+	
+	// Load XAudio2
+	state.XAudioLib = LoadLibraryA("xaudio2_9.dll");
+	if (!state.XAudioLib) {
+		ELSA_ERROR("Failed to load XAudio dll!");
+		return false;
+	}
+	XAudio2CreateProc = (PFN_XAUDIO2_CREATE)GetProcAddress(state.XAudioLib, "XAudio2Create");
+	if (!XAudio2CreateProc) {
+		ELSA_ERROR("Failed to load XAudio2Create!");
+		return false;
+	}
+	X3DAudioInitializeProc = (PFN_X3DAUDIO_INITIALIZE)GetProcAddress(state.XAudioLib, "X3DAudioInitialize");
+	if (!X3DAudioInitializeProc) {
+		ELSA_ERROR("Failed to load X3DAudioInitialize!");
 		return false;
 	}
 	
@@ -47,7 +82,7 @@ b8 XAudio2BackendInit(AudioBackend* backend)
 #endif
 	
 	// Create XAudio2
-	hr = XAudio2Create(&state.Device, flags, XAUDIO2_DEFAULT_PROCESSOR);
+	hr = XAudio2CreateProc(&state.Device, flags, XAUDIO2_DEFAULT_PROCESSOR);
 	if (FAILED(hr)) {
 		ELSA_ERROR("XAudio2Create failed.");
 		return false;
@@ -79,7 +114,7 @@ b8 XAudio2BackendInit(AudioBackend* backend)
 	state.SampleRate = details.InputSampleRate;
 	state.ChannelCount = details.InputChannels;
 	
-	hr = X3DAudioInitialize(dwChannelMask, X3DAUDIO_SPEED_OF_SOUND, state.X3DInstance);
+	hr = X3DAudioInitializeProc(dwChannelMask, X3DAUDIO_SPEED_OF_SOUND, state.X3DInstance);
 	if (FAILED(hr)) {
 		ELSA_ERROR("Failed to initialize X3DAudio.");
 		return false;
@@ -97,6 +132,7 @@ void XAudio2BackendShutdown(AudioBackend* backend)
 	state.Device->StopEngine();
 	state.Device->Release();
 	
+	FreeLibrary(state.XAudioLib);
 	CoUninitialize();
 }
 
@@ -115,8 +151,6 @@ b8 AudioSourceCreate(AudioSource* out_source)
 	
 	out_source->BackendData = MemoryTrackerAlloc(sizeof(XAudio2Source), MEMORY_TAG_AUDIO);
 	XAudio2Source* source = (XAudio2Source*)out_source->BackendData;
-	
-	// Source voice
 	
 	// Wave format
 	WAVEFORMATEX wave_format = {};
