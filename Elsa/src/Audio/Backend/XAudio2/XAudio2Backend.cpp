@@ -255,6 +255,9 @@ void AudioSourceSetPitch(f32 pitch, AudioSource* source)
 
 void AudioSourceSetLowPassFilter(f32 frequency, f32 one_over_q, AudioSource* source)
 {
+	if (frequency > 1.0f || one_over_q < 1.5f)
+		return;
+	
 	source->Filters.LowPass.Frequency = frequency;
 	source->Filters.LowPass.OneOverQ = one_over_q;
 	
@@ -262,6 +265,23 @@ void AudioSourceSetLowPassFilter(f32 frequency, f32 one_over_q, AudioSource* sou
 	
 	XAUDIO2_FILTER_PARAMETERS filter_parameters = {};
 	filter_parameters.Type = LowPassFilter;
+	filter_parameters.Frequency = frequency;
+	filter_parameters.OneOverQ = one_over_q;
+	backend->SourceVoice->SetFilterParameters(&filter_parameters, XAUDIO2_COMMIT_NOW);
+}
+
+void AudioSourceSetHighPassFilter(f32 frequency, f32 one_over_q, AudioSource* source)
+{
+	if (frequency > 1.0f || one_over_q < 1.5f)
+		return;
+	
+	source->Filters.HighPass.Frequency = frequency;
+	source->Filters.HighPass.OneOverQ = one_over_q;
+	
+	XAudio2Source* backend = (XAudio2Source*)source->BackendData;
+	
+	XAUDIO2_FILTER_PARAMETERS filter_parameters = {};
+	filter_parameters.Type = HighPassFilter;
 	filter_parameters.Frequency = frequency;
 	filter_parameters.OneOverQ = one_over_q;
 	backend->SourceVoice->SetFilterParameters(&filter_parameters, XAUDIO2_COMMIT_NOW);

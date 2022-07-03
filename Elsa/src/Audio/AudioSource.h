@@ -68,6 +68,15 @@ ELSA_API void AudioSourceSetPitch(f32 pitch, AudioSource* source);
 ELSA_API void AudioSourceSetLowPassFilter(f32 frequency, f32 one_over_q, AudioSource* source);
 
 /**
+* @brief Sets the high pass filter of an audio source.
+*
+* @param frequency The frequency of the high pass filter.
+* @param one_over_q The reciprocal Q factor of the high pass filter.
+* @param source A pointer to the audio source.
+*/
+ELSA_API void AudioSourceSetHighPassFilter(f32 frequency, f32 one_over_q, AudioSource* source);
+
+/**
 * @brief Destroys an audio source.
 *
 * @param source A pointer to the audio source.
