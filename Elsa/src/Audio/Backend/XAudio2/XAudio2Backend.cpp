@@ -8,7 +8,7 @@ extern "C" {
 #if defined(ELSA_PLATFORM_WINDOWS)
 
 /*
-TODO(milo): Sound effects (high pass, low pass, reverb)
+TODO(milo): Sound effects: reverb
 
 TODO(milo): 3D spatialized audio (badass)
 */
@@ -282,6 +282,40 @@ void AudioSourceSetHighPassFilter(f32 frequency, f32 one_over_q, AudioSource* so
 	
 	XAUDIO2_FILTER_PARAMETERS filter_parameters = {};
 	filter_parameters.Type = HighPassFilter;
+	filter_parameters.Frequency = frequency;
+	filter_parameters.OneOverQ = one_over_q;
+	backend->SourceVoice->SetFilterParameters(&filter_parameters, XAUDIO2_COMMIT_NOW);
+}
+
+void AudioSourceSetBandPassFilter(f32 frequency, f32 one_over_q, AudioSource* source)
+{
+	if (frequency > 1.0f || one_over_q < 1.5f)
+		return;
+	
+	source->Filters.BandPass.Frequency = frequency;
+	source->Filters.BandPass.OneOverQ = one_over_q;
+	
+	XAudio2Source* backend = (XAudio2Source*)source->BackendData;
+	
+	XAUDIO2_FILTER_PARAMETERS filter_parameters = {};
+	filter_parameters.Type = BandPassFilter;
+	filter_parameters.Frequency = frequency;
+	filter_parameters.OneOverQ = one_over_q;
+	backend->SourceVoice->SetFilterParameters(&filter_parameters, XAUDIO2_COMMIT_NOW);
+}
+
+void AudioSourceSetNotchFilter(f32 frequency, f32 one_over_q, AudioSource* source)
+{
+	if (frequency > 1.0f || one_over_q < 1.5f)
+		return;
+	
+	source->Filters.NotchPass.Frequency = frequency;
+	source->Filters.NotchPass.OneOverQ = one_over_q;
+	
+	XAudio2Source* backend = (XAudio2Source*)source->BackendData;
+	
+	XAUDIO2_FILTER_PARAMETERS filter_parameters = {};
+	filter_parameters.Type = NotchFilter;
 	filter_parameters.Frequency = frequency;
 	filter_parameters.OneOverQ = one_over_q;
 	backend->SourceVoice->SetFilterParameters(&filter_parameters, XAUDIO2_COMMIT_NOW);
