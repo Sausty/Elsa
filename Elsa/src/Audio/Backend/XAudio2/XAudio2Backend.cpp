@@ -164,7 +164,7 @@ b8 AudioSourceCreate(AudioSource* out_source)
 	wave_format.nBlockAlign = (wave_format.nChannels * wave_format.wBitsPerSample) / 8; // 4 bytes commonly
 	wave_format.cbSize = 0;
 	
-	HRESULT hr = state.Device->CreateSourceVoice(&source->SourceVoice, (WAVEFORMATEX*)&wave_format, XAUDIO2_VOICE_USEFILTER, 1.0, NULL, NULL, NULL);
+	HRESULT hr = state.Device->CreateSourceVoice(&source->SourceVoice, (WAVEFORMATEX*)&wave_format, 0, 1024.0f, NULL, NULL, NULL);
 	if (FAILED(hr))
 		return false;
 	
@@ -244,7 +244,15 @@ void AudioSourceSetVolume(f32 volume, AudioSource* source)
 	source->Volume = volume;
 	
 	XAudio2Source* backend = (XAudio2Source*)source->BackendData;
-	backend->SourceVoice->SetVolume(volume);
+	backend->SourceVoice->SetVolume(volume, XAUDIO2_COMMIT_NOW);
+}
+
+void AudioSourceSetPitch(f32 pitch, AudioSource* source)
+{
+	source->Pitch = pitch;
+	
+	XAudio2Source* backend = (XAudio2Source*)source->BackendData;
+	backend->SourceVoice->SetFrequencyRatio(pitch, XAUDIO2_COMMIT_NOW);
 }
 
 #endif

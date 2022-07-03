@@ -17,6 +17,8 @@ typedef struct AudioSource {
 	b8 Looping;
 	/** @brief The volume of the audio source. Ranges from 0.0f to 1.0f. */
 	f32 Volume;
+	/** @brief The pitch of the audio source. Ranges from 1/1024 to 1024/1. */
+	f32 Pitch;
 	
 	/** @brief The position of the audio source in space. */
 	v3f Position;

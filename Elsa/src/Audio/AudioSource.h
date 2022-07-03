@@ -51,6 +51,14 @@ ELSA_API void AudioSourceStop(AudioSource* source);
 ELSA_API void AudioSourceSetVolume(f32 volume, AudioSource* source);
 
 /**
+* @brief Sets the pitch of an audio source.
+*
+* @param pitch The pitch of the source.
+* @param source A pointer to the audio source.
+*/
+ELSA_API void AudioSourceSetPitch(f32 pitch, AudioSource* source);
+
+/**
 * @brief Destroys an audio source.
 *
 * @param source A pointer to the audio source.
