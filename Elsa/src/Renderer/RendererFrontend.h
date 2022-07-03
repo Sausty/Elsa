@@ -1,5 +1,5 @@
 /**
- * @file RendererBackend.h
+ * @file RendererFrontend.h
  * @author Milo Heinrich (MikuoH15TH@gmail.com)
  * @brief The renderer frontend, which is the only thing the rest of the engine sees.
  * This is responsible for transferring any data to and from the renderer backend

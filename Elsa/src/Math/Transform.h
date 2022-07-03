@@ -1,5 +1,5 @@
 /**
- * @file Math.h
+ * @file Transform.h
  * @author Milo Heinrich (MikuoH15TH@gmail.com)
  * @brief This file contains definitions for various transform functions.
  * @version 1.0

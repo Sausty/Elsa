@@ -1,5 +1,5 @@
 /**
- * @file Platform.h
+ * @file FileSystem.h
  * @author Milo Heinrich (MikuoH15TH@gmail.com)
  * @brief This file contains structures and functions for interacting with
  * the file system.

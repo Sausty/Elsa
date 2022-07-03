@@ -1,5 +1,5 @@
 /**
- * @file XAudio2Backend.h
+ * @file AVFoundationBackend.h
  * @author Milo Heinrich (MikuoH15TH@gmail.com)
  * @brief This file contains the audio backend for AVFoundation.
  * @version 1.0

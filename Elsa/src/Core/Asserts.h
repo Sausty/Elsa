@@ -1,5 +1,5 @@
 /**
- * @file Event.h
+ * @file Asserts.h
  * @author Milo Heinrich (MikuoH15TH@gmail.com)
  * @brief This file contains assertion functions to be used throughout
  * the codebase.

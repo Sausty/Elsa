@@ -1,5 +1,5 @@
 /**
- * @file Event.h
+ * @file MemTracker.h
  * @author Milo Heinrich (MikuoH15TH@gmail.com)
  * @brief This file contains all logic pertaining to the memory tracking system.
  * @version 1.0
