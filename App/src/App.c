@@ -17,6 +17,7 @@ b8 GameInit(Game* game)
 	AudioSourceLoad("Assets/Audio/SyncamoreTheme.wav", &app.TestSource);
 	AudioSourceSetVolume(1.0f, &app.TestSource);
 	AudioSourceSetPitch(1.0f, &app.TestSource);
+	AudioSourceSetLowPassFilter(1.0, 1.0f, &app.TestSource);
 	AudioSourcePlay(&app.TestSource);
 	
 	return true;

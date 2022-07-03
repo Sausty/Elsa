@@ -11,6 +11,14 @@
 #include <Defines.h>
 #include <Math/Math.h>
 
+/** @brief Structure representing audio filter data. */
+typedef struct AudioFilter {
+	/** @brief The frequency of filter */
+	f32 Frequency;
+	/** @brief Reciprocal of Q factor */
+	f32 OneOverQ;
+} AudioFilter;
+
 /** @brief A structure representing an audio source in space. */
 typedef struct AudioSource {
 	/** @brief Whether or not the audio source should loop when it's finished. */
@@ -19,6 +27,14 @@ typedef struct AudioSource {
 	f32 Volume;
 	/** @brief The pitch of the audio source. Ranges from 1/1024 to 1024/1. */
 	f32 Pitch;
+	
+	/** @brief Opaque structure holding all the audio filter data. */
+	struct {
+		AudioFilter LowPass;
+		AudioFilter BandPass;
+		AudioFilter HighPass;
+		AudioFilter NotchPass;
+	} Filters;
 	
 	/** @brief The position of the audio source in space. */
 	v3f Position;

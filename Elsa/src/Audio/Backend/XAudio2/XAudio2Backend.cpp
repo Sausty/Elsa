@@ -8,8 +8,6 @@ extern "C" {
 #if defined(ELSA_PLATFORM_WINDOWS)
 
 /*
-TODO(milo): Pitch modifiers
-
 TODO(milo): Sound effects (high pass, low pass, reverb)
 
 TODO(milo): 3D spatialized audio (badass)
@@ -164,7 +162,7 @@ b8 AudioSourceCreate(AudioSource* out_source)
 	wave_format.nBlockAlign = (wave_format.nChannels * wave_format.wBitsPerSample) / 8; // 4 bytes commonly
 	wave_format.cbSize = 0;
 	
-	HRESULT hr = state.Device->CreateSourceVoice(&source->SourceVoice, (WAVEFORMATEX*)&wave_format, 0, 1024.0f, NULL, NULL, NULL);
+	HRESULT hr = state.Device->CreateSourceVoice(&source->SourceVoice, (WAVEFORMATEX*)&wave_format, XAUDIO2_VOICE_USEFILTER, 1024.0f, NULL, NULL, NULL);
 	if (FAILED(hr))
 		return false;
 	
@@ -253,6 +251,20 @@ void AudioSourceSetPitch(f32 pitch, AudioSource* source)
 	
 	XAudio2Source* backend = (XAudio2Source*)source->BackendData;
 	backend->SourceVoice->SetFrequencyRatio(pitch, XAUDIO2_COMMIT_NOW);
+}
+
+void AudioSourceSetLowPassFilter(f32 frequency, f32 one_over_q, AudioSource* source)
+{
+	source->Filters.LowPass.Frequency = frequency;
+	source->Filters.LowPass.OneOverQ = one_over_q;
+	
+	XAudio2Source* backend = (XAudio2Source*)source->BackendData;
+	
+	XAUDIO2_FILTER_PARAMETERS filter_parameters = {};
+	filter_parameters.Type = LowPassFilter;
+	filter_parameters.Frequency = frequency;
+	filter_parameters.OneOverQ = one_over_q;
+	backend->SourceVoice->SetFilterParameters(&filter_parameters, XAUDIO2_COMMIT_NOW);
 }
 
 #endif
