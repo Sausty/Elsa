@@ -13,10 +13,12 @@ static AppData app;
 
 b8 GameInit(Game* game)
 {
-	if (!AudioSourceCreate(&app.TestSource))
-		ELSA_ERROR("Failed to create audio source!");
+	AudioSourceCreate(&app.TestSource);
+	AudioSourceLoad("Assets/Audio/SyncamoreTheme.wav", &app.TestSource);
+	AudioSourceSetVolume(0.3f, &app.TestSource);
+	AudioSourcePlay(&app.TestSource);
 	
-    return true;
+	return true;
 }
 
 b8 GameFree(Game* game)

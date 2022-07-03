@@ -6,7 +6,7 @@ cFilenames=$(find . -type f -name "*.c" -o -name "*.m" -name "*.cpp")
 
 Assembly="Elsa"
 CompilerFlags="-g -shared -fdeclspec -fPIC -fno-objc-arc -fsanitize=address"
-IncludeFlags="-Isrc"
+IncludeFlags="-Isrc -IVendor"
 LinkerFlags="-lobjc -framework AppKit -framework QuartzCore -framework GameController -framework CoreHaptics -framework Metal"
 Defines="-D_DEBUG -DELSA_EXPORT"
 

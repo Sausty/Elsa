@@ -19,6 +19,38 @@
 ELSA_API b8 AudioSourceCreate(AudioSource* out_source);
 
 /**
+* @brief Loads a .wav file to an audio source.
+*
+* @param path The path of the file to load.
+* @param source A pointer to the audio source.
+* @returns True on success; otherwise false;
+*/
+ELSA_API b8 AudioSourceLoad(const char* path, AudioSource* source);
+
+/**
+* @brief Plays an audio source.
+*
+* @param source The audio source to play.
+* @returns True on success; otherwise false.
+*/
+ELSA_API b8 AudioSourcePlay(AudioSource* source);
+
+/**
+* @brief Stops an audio source.
+*
+* @param source The audio source to stop.
+*/
+ELSA_API void AudioSourceStop(AudioSource* source);
+
+/**
+* @brief Sets the volume of an audio source.
+*
+* @param volume The volume of the source.
+* @param source A pointer to the audio source.
+*/
+ELSA_API void AudioSourceSetVolume(f32 volume, AudioSource* source);
+
+/**
 * @brief Destroys an audio source.
 *
 * @param source A pointer to the audio source.

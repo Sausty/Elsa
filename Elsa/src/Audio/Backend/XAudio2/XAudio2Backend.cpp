@@ -8,9 +8,7 @@ extern "C" {
 #if defined(ELSA_PLATFORM_WINDOWS)
 
 /*
-TODO(milo): Load audio files and play them
-
-TODO(milo): Loop and volume modifiers
+TODO(milo): Pitch modifiers
 
 TODO(milo): Sound effects (high pass, low pass, reverb)
 
@@ -21,6 +19,7 @@ TODO(milo): 3D spatialized audio (badass)
 #include <Windows.h>
 #include <XAudio2.h>
 #include <x3daudio.h>
+#include <dr_wav/dr_wav.h>
 
 #define AUDIO_CHANNELS XAUDIO2_DEFAULT_CHANNELS
 #define AUDIO_SAMPLE_RATE XAUDIO2_DEFAULT_SAMPLERATE
@@ -44,6 +43,9 @@ typedef struct XAudio2State {
 typedef struct XAudio2Source {
 	IXAudio2SourceVoice* SourceVoice;
 	X3DAUDIO_EMITTER AudioEmitter;
+	
+	drwav Wav;
+	i16* SampleData;
 } XAudio2Source;
 
 static XAudio2State state;
@@ -155,7 +157,7 @@ b8 AudioSourceCreate(AudioSource* out_source)
 	// Wave format
 	WAVEFORMATEX wave_format = {};
 	wave_format.wFormatTag = WAVE_FORMAT_PCM; // PCM audio format
-	wave_format.wBitsPerSample = 16; // s16
+	wave_format.wBitsPerSample = 16; // i16
 	wave_format.nChannels = state.ChannelCount; // 2 channels commonly
 	wave_format.nSamplesPerSec = state.SampleRate; // 48khz or 48000 sample rate commonly
 	wave_format.nAvgBytesPerSec = (wave_format.wBitsPerSample * wave_format.nSamplesPerSec * wave_format.nChannels) / 8;
@@ -176,10 +178,73 @@ b8 AudioSourceCreate(AudioSource* out_source)
 void AudioSourceDestroy(AudioSource* source)
 {
 	XAudio2Source* backend = (XAudio2Source*)source->BackendData;
+	if (backend->SampleData) {
+		MemoryTrackerFree(backend->SampleData, backend->Wav.totalPCMFrameCount * state.ChannelCount * sizeof(i16), MEMORY_TAG_AUDIO);
+		drwav_uninit(&backend->Wav);
+	}
+	
 	if (backend->SourceVoice)
 		backend->SourceVoice->DestroyVoice();
 	
 	MemoryTrackerFree(source->BackendData, sizeof(XAudio2Source), MEMORY_TAG_AUDIO);
+}
+
+b8 AudioSourceLoad(const char* path, AudioSource* source)
+{
+	XAudio2Source* backend = (XAudio2Source*)source->BackendData;
+	if (!drwav_init_file(&backend->Wav, path, NULL)) {
+		ELSA_ERROR("Failed to load audio file from path: %s", path);
+		return false;
+	}
+	
+	backend->SampleData = (i16*)MemoryTrackerAlloc(backend->Wav.totalPCMFrameCount * state.ChannelCount * sizeof(i16), MEMORY_TAG_AUDIO);
+	drwav_read_pcm_frames_s16(&backend->Wav, backend->Wav.totalPCMFrameCount, backend->SampleData);
+	
+	// Setup XAudio2 buffer
+	XAUDIO2_BUFFER audio_buffer = {};
+	audio_buffer.Flags = 0;
+	audio_buffer.AudioBytes = backend->Wav.totalPCMFrameCount * state.ChannelCount * sizeof(i16);
+	audio_buffer.pAudioData = (BYTE*)backend->SampleData;
+	audio_buffer.PlayBegin = 0;
+	audio_buffer.PlayLength = 0; // Play the entire buffer
+	audio_buffer.LoopBegin = 0;
+	audio_buffer.LoopLength = 0;
+	audio_buffer.LoopCount = source->Looping ? XAUDIO2_LOOP_INFINITE : 0;
+	audio_buffer.pContext = NULL;
+	
+	HRESULT hr = backend->SourceVoice->SubmitSourceBuffer(&audio_buffer, NULL);
+	if (FAILED(hr)) {
+		ELSA_ERROR("Failed to submit audio data to the source voice.");
+		return false;
+	}
+	
+	return true;
+}
+
+b8 AudioSourcePlay(AudioSource* source)
+{
+	XAudio2Source* backend = (XAudio2Source*)source->BackendData;
+	
+	if (FAILED(backend->SourceVoice->Start(0, 0))) {
+		ELSA_ERROR("Failed to play source voice.");
+		return false;
+	}
+	
+	return true;
+}
+
+void AudioSourceStop(AudioSource* source)
+{
+	XAudio2Source* backend = (XAudio2Source*)source->BackendData;
+	backend->SourceVoice->Stop(0, 0);
+}
+
+void AudioSourceSetVolume(f32 volume, AudioSource* source)
+{
+	source->Volume = volume;
+	
+	XAudio2Source* backend = (XAudio2Source*)source->BackendData;
+	backend->SourceVoice->SetVolume(volume);
 }
 
 #endif

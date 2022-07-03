@@ -5,6 +5,10 @@
 #include "XAudio2/XAudio2Backend.h"
 #include "AVFoundation/AVFoundationBackend.h"
 
+// NOTE(milo): build dr_wav
+#define DR_WAV_IMPLEMENTATION
+#include <dr_wav/dr_wav.h>
+
 b8 AudioBackendCreate(AudioBackendAPI api, AudioBackend* out_audio_backend)
 {
 	if (api == AUDIO_BACKEND_API_XAUDIO2) {

@@ -17,6 +17,7 @@ patterns = {
 load_paths_custom = {
 	{"."},
 	{"Elsa"},
+	{"Elsa/Vendor"},
 	{"${VULKAN_SDK}/Include"}
 };
 
