@@ -9,6 +9,8 @@
 #define DR_WAV_IMPLEMENTATION
 #include <dr_wav/dr_wav.h>
 
+// TODO(milo): Get rid of dr_wav and make my own wav loader
+
 b8 AudioBackendCreate(AudioBackendAPI api, AudioBackend* out_audio_backend)
 {
 	if (api == AUDIO_BACKEND_API_XAUDIO2) {
