@@ -9,6 +9,7 @@
 #define ELSA_AUDIO_TYPES_H
 
 #include <Defines.h>
+#include <Audio/AudioTypes.h>
 
 typedef enum AudioBackendAPI {
 	/** @brief (SUPPORTED: WIN32) The XAudio2 backend */

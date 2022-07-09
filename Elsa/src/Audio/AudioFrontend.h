@@ -12,6 +12,7 @@
 
 #include <Defines.h>
 #include <Audio/Backend/AudioBackend.h>
+#include <Audio/AudioTypes.h>
 
 /**
  * @brief Initializes the renderer frontend.

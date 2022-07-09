@@ -36,28 +36,8 @@ typedef struct AudioSource {
 		AudioFilter NotchPass;
 	} Filters;
 	
-	/** @brief The position of the audio source in space. */
-	v3f Position;
-	/** @brief The velocity of the audio source in space. */
-	v3f Velocity;
-	
 	/** @brief Opaque pointer that holds the backend data of the audio source. */
 	void* BackendData;
 } AudioSource;
-
-/** @brief A structure representing an audio listener. Only one listener is required per scene. */
-typedef struct AudioListener {
-	/** @brief The position of the listener. */
-	v3f Position;
-	/** @brief The velocity of the listener. */
-	v3f Velocity;
-	/** @brief The front orientation of the listener. */
-	v3f OrientationFront;
-	/** @brief The top orientation of the listener. */
-	v3f OrientationTop;
-	
-	/** @brief Opaque pointer that holds the backend data of the audio listener. */
-	void* BackendData;
-} AudioListener;
 
 #endif

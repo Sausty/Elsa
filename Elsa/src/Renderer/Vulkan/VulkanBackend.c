@@ -9,6 +9,7 @@
 
 #include "VulkanTypes.h"
 #include "VulkanDevice.h"
+#include "VulkanAllocator.h"
 
 static VulkanContext context;
 
@@ -83,6 +84,11 @@ b8 VulkanRendererBackendInit(RendererBackend* backend)
         return false;
     }
 	
+	if (!VulkanAllocatorInit(&context.Allocator, &context)) {
+		ELSA_ERROR("VulkanAllocatorInit failed. Shutting down...");
+        return false;
+	}
+	
     return true;
 }
 
@@ -90,6 +96,7 @@ void VulkanRendererBackendShutdown(RendererBackend* backend)
 {
     vkDeviceWaitIdle(context.Device.LogicalDevice);
 	
+	VulkanAllocatorFree(&context.Allocator, &context);
     VulkanDeviceDestroy(&context);
     vkDestroySurfaceKHR(context.Instance, context.Surface, NULL);
     vkDestroyInstance(context.Instance, NULL);

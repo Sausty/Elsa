@@ -40,10 +40,9 @@ typedef struct XAudio2State {
 
 typedef struct XAudio2Source {
 	IXAudio2SourceVoice* SourceVoice;
-	X3DAUDIO_EMITTER AudioEmitter;
 	
-	drwav Wav;
-	i16* SampleData;
+	drwav Wave;
+	i16* Samples;
 } XAudio2Source;
 
 static XAudio2State state;
@@ -146,9 +145,6 @@ b8 AudioSourceCreate(AudioSource* out_source)
 	out_source->Looping = false;
 	out_source->Volume = 1.0f;
 	
-	out_source->Position = V3Zero();
-	out_source->Velocity = V3Zero();
-	
 	out_source->BackendData = MemoryTrackerAlloc(sizeof(XAudio2Source), MEMORY_TAG_AUDIO);
 	XAudio2Source* source = (XAudio2Source*)out_source->BackendData;
 	
@@ -166,19 +162,15 @@ b8 AudioSourceCreate(AudioSource* out_source)
 	if (FAILED(hr))
 		return false;
 	
-	// Emitter
-	source->AudioEmitter.Position = XMFLOAT3(out_source->Position.x, out_source->Position.y, out_source->Position.z);
-	source->AudioEmitter.Velocity = XMFLOAT3(out_source->Velocity.x, out_source->Velocity.y, out_source->Velocity.z);
-	
 	return true;
 }
 
 void AudioSourceDestroy(AudioSource* source)
 {
 	XAudio2Source* backend = (XAudio2Source*)source->BackendData;
-	if (backend->SampleData) {
-		MemoryTrackerFree(backend->SampleData, backend->Wav.totalPCMFrameCount * state.ChannelCount * sizeof(i16), MEMORY_TAG_AUDIO);
-		drwav_uninit(&backend->Wav);
+	if (backend->Samples) {
+		MemoryTrackerFree(backend->Samples, backend->Wave.totalPCMFrameCount * state.ChannelCount * sizeof(i16), MEMORY_TAG_AUDIO);
+		drwav_uninit(&backend->Wave);
 	}
 	
 	if (backend->SourceVoice)
@@ -190,19 +182,20 @@ void AudioSourceDestroy(AudioSource* source)
 b8 AudioSourceLoad(const char* path, AudioSource* source)
 {
 	XAudio2Source* backend = (XAudio2Source*)source->BackendData;
-	if (!drwav_init_file(&backend->Wav, path, NULL)) {
-		ELSA_ERROR("Failed to load audio file from path: %s", path);
+	if (!drwav_init_file(&backend->Wave, path, NULL)) {
+		ELSA_ERROR("Failed to load .wav file from path %s", path);
 		return false;
 	}
 	
-	backend->SampleData = (i16*)MemoryTrackerAlloc(backend->Wav.totalPCMFrameCount * state.ChannelCount * sizeof(i16), MEMORY_TAG_AUDIO);
-	drwav_read_pcm_frames_s16(&backend->Wav, backend->Wav.totalPCMFrameCount, backend->SampleData);
+	backend->Samples = (i16*)MemoryTrackerAlloc(backend->Wave.totalPCMFrameCount * state.ChannelCount * sizeof(i16), MEMORY_TAG_AUDIO);
+	drwav_read_pcm_frames_s16(&backend->Wave, backend->Wave.totalPCMFrameCount, backend->Samples);
+	
 	
 	// Setup XAudio2 buffer
 	XAUDIO2_BUFFER audio_buffer = {};
 	audio_buffer.Flags = 0;
-	audio_buffer.AudioBytes = backend->Wav.totalPCMFrameCount * state.ChannelCount * sizeof(i16);
-	audio_buffer.pAudioData = (BYTE*)backend->SampleData;
+	audio_buffer.AudioBytes = backend->Wave.totalPCMFrameCount * state.ChannelCount * sizeof(i16);
+	audio_buffer.pAudioData = (BYTE*)backend->Samples;
 	audio_buffer.PlayBegin = 0;
 	audio_buffer.PlayLength = 0; // Play the entire buffer
 	audio_buffer.LoopBegin = 0;

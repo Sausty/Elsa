@@ -12,6 +12,7 @@
 #include <Core/Asserts.h>
 
 #include <vulkan/vulkan.h>
+#include <VMA/vk_mem_alloc.h>
 
 // TODO(milo): GPU memory allocator using pool allocation
 // TODO(milo): Image
@@ -22,6 +23,10 @@
 // TODO(milo): Shader system
 
 #define VK_CHECK(error) ELSA_ASSERT(error == VK_SUCCESS)
+
+typedef struct VulkanAllocator {
+	VmaAllocator Allocator;
+} VulkanAllocator;
 
 typedef struct VulkanSwapchainSupport {
 	VkSurfaceCapabilitiesKHR Capabilities;
@@ -59,6 +64,8 @@ typedef struct VulkanContext {
     VkInstance Instance;
     VkSurfaceKHR Surface;
     VulkanDevice Device;
+	
+	VulkanAllocator Allocator;
 } VulkanContext;
 
 #endif

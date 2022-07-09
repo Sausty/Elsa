@@ -9,9 +9,9 @@ FOR /R %%f in (*.c, *.cpp) do (
 )
 
 SET Assembly=Elsa
-SET CompilerFlags=-g -MD -shared -Wvarargs -Wall -Werror -Wvla -Wgnu-folding-constant -Wno-missing-braces -fdeclspec
+SET CompilerFlags=-g -MD -shared -Wvarargs -Wall -Werror -Wno-unused-variable -Wno-nullability-completeness -Wgnu-folding-constant -Wno-missing-braces -fdeclspec 
 SET IncludeFlags=-Isrc -IVendor -I%VULKAN_SDK%/Include
-SET LinkerFlags=-luser32 -lole32 -lvulkan-1 -L%VULKAN_SDK%/Lib
+SET LinkerFlags=-luser32 -lole32 -lvulkan-1 -lmsvcrtd -L%VULKAN_SDK%/Lib
 SET Defines=-D_DEBUG -DELSA_EXPORT -D_CRT_SECURE_NO_WARNINGS
 
 ECHO "Building %Assembly%..."
