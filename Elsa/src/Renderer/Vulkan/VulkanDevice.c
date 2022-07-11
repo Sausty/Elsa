@@ -292,6 +292,15 @@ b8 VulkanDeviceCreate(VulkanContext* context)
 					 0,
 					 &context->Device.TransferQueue);
 	
+	VkCommandPoolCreateInfo pool_create_info = {VK_STRUCTURE_TYPE_COMMAND_POOL_CREATE_INFO};
+    pool_create_info.queueFamilyIndex = context->Device.GraphicsQueueIndex;
+    pool_create_info.flags = VK_COMMAND_POOL_CREATE_RESET_COMMAND_BUFFER_BIT;
+    VK_CHECK(vkCreateCommandPool(
+								 context->Device.LogicalDevice,
+								 &pool_create_info,
+								 NULL,
+								 &context->Device.GraphicsCommandPool));
+	
     return true;
 }
 
@@ -302,6 +311,7 @@ void VulkanDeviceDestroy(VulkanContext* context)
 	if (context->Device.SwapchainSupport.PresentModes)
 		MemoryTrackerFree(context->Device.SwapchainSupport.PresentModes, sizeof(VkPresentModeKHR) * context->Device.SwapchainSupport.PresentModeCount, MEMORY_TAG_RENDERER);
 	
+	vkDestroyCommandPool(context->Device.LogicalDevice, context->Device.GraphicsCommandPool, NULL);
     vkDestroyDevice(context->Device.LogicalDevice, NULL);
 }
 

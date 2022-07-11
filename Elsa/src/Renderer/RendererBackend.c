@@ -15,7 +15,7 @@ b8 RendererBackendCreate(RendererBackendAPI api, RendererBackend* out_renderer_b
         out_renderer_backend->Resized = MetalRendererBackendResized;
         out_renderer_backend->BeginFrame = MetalRendererBackendBeginFrame;
         out_renderer_backend->EndFrame = MetalRendererBackendEndFrame;
-
+		
         return true;
 #else 
         return false;
@@ -26,15 +26,17 @@ b8 RendererBackendCreate(RendererBackendAPI api, RendererBackend* out_renderer_b
         out_renderer_backend->Init = VulkanRendererBackendInit;
         out_renderer_backend->Shutdown = VulkanRendererBackendShutdown;
         out_renderer_backend->Resized = VulkanRendererBackendResized;
+		out_renderer_backend->BufferCreate = VulkanRendererBackendBufferCreate,
+		out_renderer_backend->BufferFree = VulkanRendererBackendBufferFree,
         out_renderer_backend->BeginFrame = VulkanRendererBackendBeginFrame;
         out_renderer_backend->EndFrame = VulkanRendererBackendEndFrame;
-
+		
         return true;
 #else
         return false;
 #endif
     }
-
+	
     return false;
 }
 

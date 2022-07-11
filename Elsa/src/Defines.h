@@ -110,4 +110,14 @@ typedef i8 b8;
 #define ELSA_NO_INLINE 
 #endif
 
+/**
+ * @brief Clamps value to a range of min and max (inclusive).
+ * @param value The value to be clamped.
+ * @param min The minimum value of the range.
+ * @param max The maximum value of the range.
+ * @returns The clamped value.
+ */
+#define ELSA_CLAMP(value, min, max) ((value <= min) ? min : (value >= max) ? max \
+: value)
+
 #endif

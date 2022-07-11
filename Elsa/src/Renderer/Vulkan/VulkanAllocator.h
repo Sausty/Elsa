@@ -12,5 +12,7 @@
 
 b8 VulkanAllocatorInit(VulkanAllocator* allocator, VulkanContext* context);
 void VulkanAllocatorFree(VulkanAllocator* allocator, VulkanContext* context);
+Buffer* VulkanAllocatorBufferCreate(VulkanAllocator* allocator, u64 size, BufferUsage usage);
+void VulkanAllocatorBufferFree(VulkanAllocator* allocator, Buffer* buffer);
 
 #endif
