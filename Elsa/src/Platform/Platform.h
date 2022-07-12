@@ -16,6 +16,8 @@
 
 struct VulkanContext;
 
+#define PLATFORM_MAX_PATH 260
+
 /**
  * @brief Performs startup routines within the platform layer. 
  * 
@@ -115,6 +117,13 @@ ELSA_API void PlatformConsoleWriteError(const char* message, u8 colour);
  * @returns The pointer of the window view.
  */
 ELSA_API void* PlatformGetWindowView();
+
+/**
+* @brief Appends the names of all the files present in the given directory.
+* @param directory The directory to scan.
+* @param files_darray A pointer to the array of the filenames. Must be a darray.
+*/
+ELSA_API void PlatformGetDirectoryFiles(const char* directory, char*** files_darray);
 
 /**
  * @brief Appends the names of required extensions for this platform to

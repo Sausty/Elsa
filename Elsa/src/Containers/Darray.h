@@ -113,7 +113,7 @@ ELSA_API void* _Darray_Insert_At(void* array, u64 index, void* value_ptr);
  * @returns A pointer to the array's memory block.
  */
 #define Darray_Create(type) \
-        _Darray_Create(DARRAY_DEFAULT_CAPACITY, sizeof(type))
+_Darray_Create(DARRAY_DEFAULT_CAPACITY, sizeof(type))
 
 /**
  * @brief Creates a new darray of the given type with the provided capacity. 
@@ -123,7 +123,7 @@ ELSA_API void* _Darray_Insert_At(void* array, u64 index, void* value_ptr);
  * @returns A pointer to the array's memory block.
  */
 #define Darray_Reserve(type, capacity) \
-        _Darray_Create(capacity, sizeof(type))
+_Darray_Create(capacity, sizeof(type))
 
 /**
  * @brief Destroys the provided array, freeing any memory allocated by it.
@@ -138,10 +138,10 @@ ELSA_API void* _Darray_Insert_At(void* array, u64 index, void* value_ptr);
  * @returns A pointer to the array block.
  */
 #define Darray_Push(array, value)               \
-        {                                       \
-    	    typeof(value) temp = value;         \
-            array = _Darray_Push(array, &temp); \
-        }
+{                                       \
+typeof(value) temp = value;         \
+array = _Darray_Push(array, &temp); \
+}
 
 /**
  * @brief Pops an entry out of the array and places it into dest.
@@ -149,7 +149,7 @@ ELSA_API void* _Darray_Insert_At(void* array, u64 index, void* value_ptr);
  * @param dest A pointer to hold the popped value.
  */
 #define Darray_Pop(array, dest) \
-        _Darray_Pop(array, dest);
+_Darray_Pop(array, dest);
 
 /**
  * @brief Inserts a copy of the given value into the supplied array at the given index.
@@ -160,10 +160,10 @@ ELSA_API void* _Darray_Insert_At(void* array, u64 index, void* value_ptr);
  * @returns The array block.
  */
 #define Darray_InsertAt(array, index, value)                \
-        {                                                   \
-            typeof(value) temp = value;                     \
-            array = _Darray_Insert_At(array, index, &temp); \
-        }
+{                                                   \
+typeof(value) temp = value;                     \
+array = _Darray_Insert_At(array, index, &temp); \
+}
 
 /**
  * @brief Pops an entry out of the array at the given index and places it into dest.
@@ -174,14 +174,14 @@ ELSA_API void* _Darray_Insert_At(void* array, u64 index, void* value_ptr);
  * @returns The array block.
  */
 #define Darray_PopAt(array, index, value_ptr) \
-        _Darray_Pop_At(array, index, value_ptr)
+_Darray_Pop_At(array, index, value_ptr)
 
 /**
  * @brief Clears all entries from the array. Does not release any internally-allocated memory.
  * @param array The array to be cleared.
  */
 #define Darray_Clear(array) \
-        _Darray_Field_Set(array, DARRAY_LENGTH, 0)
+_Darray_Field_Set(array, DARRAY_LENGTH, 0)
 
 /**
  * @brief Gets the given array's capacity.
@@ -189,7 +189,7 @@ ELSA_API void* _Darray_Insert_At(void* array, u64 index, void* value_ptr);
  * @returns The capacity of the given array.
  */
 #define Darray_Capacity(array) \
-        _Darray_Field_Get(array, DARRAY_CAPACITY)
+_Darray_Field_Get(array, DARRAY_CAPACITY)
 
 /**
  * @brief Gets the length (number of elements) in the given array.
@@ -197,7 +197,7 @@ ELSA_API void* _Darray_Insert_At(void* array, u64 index, void* value_ptr);
  * @returns The length of the given array.
  */
 #define Darray_Length(array) \
-        _Darray_Field_Get(array, DARRAY_LENGTH)
+_Darray_Field_Get(array, DARRAY_LENGTH)
 
 /**
  * @brief Gets the stride (element size) of the given array.
@@ -205,7 +205,7 @@ ELSA_API void* _Darray_Insert_At(void* array, u64 index, void* value_ptr);
  * @returns The stride of the given array.
  */
 #define Darray_Stride(array) \
-        _Darray_Field_Get(array, DARRAY_STRIDE)
+_Darray_Field_Get(array, DARRAY_STRIDE)
 
 /**
  * @brief Sets the length of the given array. This ensures the array has the
@@ -215,6 +215,6 @@ ELSA_API void* _Darray_Insert_At(void* array, u64 index, void* value_ptr);
  * @param value The length to set the array to.
  */
 #define Darray_LengthSet(array, value) \
-        _Darray_Field_Set(array, DARRAY_LENGTH, value)
+_Darray_Field_Set(array, DARRAY_LENGTH, value)
 
 #endif

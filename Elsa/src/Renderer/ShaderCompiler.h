@@ -18,10 +18,4 @@
 */
 ELSA_API b8 ShaderCompile(const char* path, ShaderModule* out_stage);
 
-/**
-* @brief Frees the given shader module.
-* @param shader The shader to free.
-*/
-ELSA_API void ShaderFree(ShaderModule* shader);
-
 #endif

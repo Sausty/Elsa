@@ -9,21 +9,21 @@
 
 ShaderStage GetStageFromString(const char* extension)
 {
-	if (!strcmp(extension, ".vert"))
+	if (strcmp(extension, "vert") == 0)
 		return SHADER_STAGE_VERTEX;
-	if (!strcmp(extension, ".frag"))
+	if (strcmp(extension, "frag") == 0)
 		return SHADER_STAGE_FRAGMENT;
-	if (!strcmp(extension, ".geom"))
+	if (strcmp(extension, "geom") == 0)
 		return SHADER_STAGE_GEOMETRY;
-	if (!strcmp(extension, ".comp"))
+	if (strcmp(extension, "comp") == 0)
 		return SHADER_STAGE_COMPUTE;
-	if (!strcmp(extension, ".tesc"))
+	if (strcmp(extension, "tesc") == 0)
 		return SHADER_STAGE_TESSELLATION_CONTROL;
-	if (!strcmp(extension, ".tese"))
+	if (strcmp(extension, "tese") == 0)
 		return SHADER_STAGE_TESSELLATION_EVALUATION;
-	if (!strcmp(extension, ".task"))
+	if (strcmp(extension, "task") == 0)
 		return SHADER_STAGE_TASK;
-	if (!strcmp(extension, ".mesh"))
+	if (strcmp(extension, "mesh") == 0)
 		return SHADER_STAGE_MESH;
 	
 	return SHADER_STAGE_VERTEX;

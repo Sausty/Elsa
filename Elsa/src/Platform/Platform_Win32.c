@@ -12,6 +12,7 @@
 #include <xinput.h>
 #include <shellapi.h>
 #include <math.h>
+#include <stdio.h>
 
 #include <vulkan/vulkan.h>
 #include <vulkan/vulkan_win32.h>
@@ -468,6 +469,26 @@ void* PlatformGetWindowView()
 void PlatformGetRequiredExtensionNames(const char*** names_darray)
 {
     Darray_Push(*names_darray, &"VK_KHR_win32_surface");
+}
+
+void PlatformGetDirectoryFiles(const char* directory, char*** files_darray)
+{
+	WIN32_FIND_DATAA data;
+	HANDLE hfind = FindFirstFileA(directory, &data);
+	
+	if (hfind != INVALID_HANDLE_VALUE) {
+		while (FindNextFileA(hfind, &data)) {
+			if (!(data.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY)) {
+				char* file = PlatformAlloc(sizeof(char) * PLATFORM_MAX_PATH);
+				PlatformZeroMemory(file, sizeof(char) * PLATFORM_MAX_PATH);
+				sprintf(file, "%s", data.cFileName);
+				Darray_Push(*files_darray, file);
+			}
+		}
+		FindClose(hfind);
+	} else {
+		ELSA_ERROR("Invalid find value!");
+	}
 }
 
 b8 PlatformCreateVulkanSurface(struct VulkanContext* context)

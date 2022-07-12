@@ -3,13 +3,16 @@
 #include <Core/Logger.h>
 #include <Core/Event.h>
 #include <Core/Input.h>
+#include <Platform/Platform.h>
+#include <Containers/Darray.h>
 #include <Audio/AudioSource.h>
 #include <Renderer/ShaderCompiler.h>
 
 typedef struct AppData {
     AudioSource TestSource;
 	
-	ShaderModule TestModule;
+	ShaderModule TestVertex;
+	ShaderModule TestFragment;
 } AppData;
 
 static AppData app;
@@ -22,8 +25,20 @@ b8 GameInit(Game* game)
 	AudioSourceSetPitch(1.0f, &app.TestSource);
 	AudioSourcePlay(&app.TestSource);
 	
-	if (!ShaderCompile("Assets/Shaders/Basic/Vertex.vert", &app.TestModule)) {
-		ELSA_ERROR("Failed to compile shader!");
+	char** filenames = Darray_Create(char*);
+	PlatformGetDirectoryFiles("Assets/Shaders/Basic/*", &filenames);
+	for (u32 i = 0; i < Darray_Length(filenames); i++) {
+		ELSA_INFO("%s", filenames[i]);
+		PlatformFree(filenames[i]);
+	}
+	Darray_Destroy(filenames);
+	
+	if (!ShaderCompile("Assets/Shaders/Basic/Vertex.vert", &app.TestVertex)) {
+		ELSA_ERROR("Failed to compile vertex shader!");
+		return false;
+	}
+	if (!ShaderCompile("Assets/Shaders/Basic/Fragment.frag", &app.TestFragment)) {
+		ELSA_ERROR("Failed to compile fragment shader!");
 		return false;
 	}
 	
@@ -32,7 +47,6 @@ b8 GameInit(Game* game)
 
 b8 GameFree(Game* game)
 {
-	ShaderFree(&app.TestModule);
 	AudioSourceStop(&app.TestSource);
 	AudioSourceDestroy(&app.TestSource);
 	
