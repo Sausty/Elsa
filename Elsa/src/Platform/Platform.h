@@ -126,6 +126,25 @@ ELSA_API void* PlatformGetWindowView();
 ELSA_API void PlatformGetDirectoryFiles(const char* directory, char*** files_darray);
 
 /**
+* @brief Returns if the given directory exists.
+* @param directory The directory to check.
+* @returns True if it exists; otherwise false.
+*/
+ELSA_API b8 PlatformDirectoryExists(const char* directory);
+
+/**
+* @brief Creates a file.
+* @param path The path of the file.
+*/
+ELSA_API void PlatformCreateFile(const char* path);
+
+/**
+* @brief Creates a directory.
+* @param path The path of the directory.
+*/
+ELSA_API void PlatformCreateDirectory(const char* path);
+
+/**
  * @brief Appends the names of required extensions for this platform to
  * the names_darray, which should be created and passed in.
  * @param names_darray A pointer to the array names of required extension names. Must be a darray

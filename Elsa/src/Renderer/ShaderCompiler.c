@@ -1,11 +1,15 @@
 #include "ShaderCompiler.h"
 
-#include <Platform/FileSystem.h>
-#include <shaderc/shaderc.h>
 #include <Core/Logger.h>
+#include <Containers/Darray.h>
+#include <Platform/FileSystem.h>
+#include <Platform/Platform.h>
 
 #include <string.h>
 #include <stdlib.h>
+#include <stdio.h>
+
+#include <shaderc/shaderc.h>
 
 ShaderStage GetStageFromString(const char* extension)
 {
@@ -101,12 +105,112 @@ b8 ShaderCompile(const char* path, ShaderModule* out_stage)
 	out_stage->ByteCode = (u8*)shaderc_result_get_bytes(result);
 	out_stage->ByteCodeSize = shaderc_result_get_length(result);
 	
+	FileSystemClose(&file_handle);
 	shaderc_compiler_release(compiler);
 	
 	return true;
 }
 
-void ShaderFree(ShaderModule* shader)
+b8 ShaderPackCreate(const char* path, ShaderPack* out_pack)
 {
+	out_pack->Modules = Darray_Create(ShaderModule);
 	
+	// Whether or not the engine should compile the shaders present in the pack.
+	b8 should_compile = true;
+	
+	// Get the binary path of the shader pack
+	char bin_path[PLATFORM_MAX_PATH];
+	sprintf(bin_path, "%s/bin", path);
+	if (PlatformDirectoryExists(bin_path)) {
+		should_compile = false;
+	} else {
+		PlatformCreateDirectory(bin_path);
+	}
+	
+	if (should_compile) {
+		// Get all the files in the directory
+		char dir_path[PLATFORM_MAX_PATH];
+		sprintf(dir_path, "%s/*", path);
+		char** filenames = Darray_Create(char*);
+		PlatformGetDirectoryFiles(dir_path, &filenames);
+		
+		for (u32 i = 0; i < Darray_Length(filenames); i++) {
+			ShaderModule module;
+			
+			// Compile shader
+			char shader_source_path[PLATFORM_MAX_PATH];
+			sprintf(shader_source_path, "%s/%s", path, filenames[i]);
+			ShaderCompile(shader_source_path, &module);
+			Darray_Push(out_pack->Modules, module);
+			
+			// Write spir-v to file
+			char shader_bin_path[PLATFORM_MAX_PATH];
+			sprintf(shader_bin_path, "%s/bin/%s.spv", path, filenames[i]);
+			PlatformCreateFile(shader_bin_path);
+			
+			FileHandle file_handle;
+			u64 bytes_written;
+			if (!FileSystemOpen(shader_bin_path, FILE_MODE_WRITE, true, &file_handle)) {
+				ELSA_FATAL("Failed to open binary file");
+				return false;
+			}
+			
+			if (!FileSystemWrite(&file_handle, module.ByteCodeSize, module.ByteCode, &bytes_written)) {
+				ELSA_FATAL("Failed to write binary file to shader pack!");
+				return false;
+			}
+			
+			// Close file
+			FileSystemClose(&file_handle);
+			PlatformFree(filenames[i]);
+		}
+	} else {
+		// Get all the files in the directory
+		char dir_path[PLATFORM_MAX_PATH];
+		sprintf(dir_path, "%s/*", path);
+		char** filenames = Darray_Create(char*);
+		PlatformGetDirectoryFiles(dir_path, &filenames);
+		
+		
+		for (u32 i = 0; i < Darray_Length(filenames); i++) {
+			ShaderModule module;
+			
+			char shader_source_path[PLATFORM_MAX_PATH];
+			sprintf(shader_source_path, "%s/%s", path, filenames[i]);
+			const char* extension = GetFilenameExtension(shader_source_path);
+			ShaderStage shader_stage = GetStageFromString(extension);
+			module.Stage = shader_stage;
+			
+			// Read spir-v from file
+			char shader_bin_path[PLATFORM_MAX_PATH];
+			sprintf(shader_bin_path, "%s/bin/%s.spv", path, filenames[i]);
+			FileHandle file_handle;
+			u64 bytes_written;
+			if (!FileSystemOpen(shader_bin_path, FILE_MODE_READ, true, &file_handle)) {
+				ELSA_FATAL("Failed to open binary file");
+				return false;
+			}
+			
+			u8 bytes_array[8192];
+			if (!FileSystemReadBytes(&file_handle, bytes_array, &module.ByteCodeSize)) {
+				ELSA_FATAL("Failed to read binary shader file!");
+				return false;
+			}
+			ELSA_INFO("%u", module.ByteCodeSize);
+			module.ByteCode = bytes_array;
+			
+			Darray_Push(out_pack->Modules, module);
+			
+			// Close file
+			FileSystemClose(&file_handle);
+			PlatformFree(filenames[i]);
+		}
+	}
+	
+	return true;
+}
+
+void ShaderPackDestroy(ShaderPack* pack)
+{
+	Darray_Destroy(pack->Modules);
 }

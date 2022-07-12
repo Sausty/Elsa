@@ -11,8 +11,7 @@
 typedef struct AppData {
     AudioSource TestSource;
 	
-	ShaderModule TestVertex;
-	ShaderModule TestFragment;
+	ShaderPack TestPack;
 } AppData;
 
 static AppData app;
@@ -25,20 +24,8 @@ b8 GameInit(Game* game)
 	AudioSourceSetPitch(1.0f, &app.TestSource);
 	AudioSourcePlay(&app.TestSource);
 	
-	char** filenames = Darray_Create(char*);
-	PlatformGetDirectoryFiles("Assets/Shaders/Basic/*", &filenames);
-	for (u32 i = 0; i < Darray_Length(filenames); i++) {
-		ELSA_INFO("%s", filenames[i]);
-		PlatformFree(filenames[i]);
-	}
-	Darray_Destroy(filenames);
-	
-	if (!ShaderCompile("Assets/Shaders/Basic/Vertex.vert", &app.TestVertex)) {
-		ELSA_ERROR("Failed to compile vertex shader!");
-		return false;
-	}
-	if (!ShaderCompile("Assets/Shaders/Basic/Fragment.frag", &app.TestFragment)) {
-		ELSA_ERROR("Failed to compile fragment shader!");
+	if (!ShaderPackCreate("Assets/Shaders/Basic", &app.TestPack)) {
+		ELSA_FATAL("Failed to load shader pack!");
 		return false;
 	}
 	

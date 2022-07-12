@@ -491,6 +491,25 @@ void PlatformGetDirectoryFiles(const char* directory, char*** files_darray)
 	}
 }
 
+b8 PlatformDirectoryExists(const char* directory)
+{
+	DWORD dwAttrib = GetFileAttributes(directory);
+	
+	return (dwAttrib != INVALID_FILE_ATTRIBUTES && 
+			(dwAttrib & FILE_ATTRIBUTE_DIRECTORY));
+}
+
+void PlatformCreateFile(const char* path)
+{
+	HANDLE hfile = CreateFileA(path, GENERIC_WRITE, FILE_SHARE_READ, NULL, CREATE_NEW, FILE_ATTRIBUTE_NORMAL, NULL);
+	CloseHandle(hfile);
+}
+
+void PlatformCreateDirectory(const char* path)
+{
+	ELSA_ASSERT(CreateDirectoryA(path, NULL));
+}
+
 b8 PlatformCreateVulkanSurface(struct VulkanContext* context)
 {
     VkWin32SurfaceCreateInfoKHR create_info = {VK_STRUCTURE_TYPE_WIN32_SURFACE_CREATE_INFO_KHR};

@@ -246,10 +246,19 @@ typedef enum ShaderStage  {
 
 /** @brief Structure representing a shader module */
 typedef struct ShaderModule {
+	/** @brief The stage of the shader. */
 	ShaderStage Stage;
+	/** @brief The SPIR-V bytecode of the shader. */
 	u8* ByteCode;
+	/** @brief The size of the SPIR-V bytecode. */
 	u64 ByteCodeSize;
 } ShaderModule;
+
+/** @brief Structure representing a pack of shaders. */
+typedef struct ShaderPack {
+	/** @brief An array containing all the shaders in the pack. */
+	ShaderModule* Modules;
+} ShaderPack;
 
 /** @brief Represents the render API used in the backend. */
 typedef enum RendererBackendAPI {
