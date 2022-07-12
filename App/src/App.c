@@ -34,6 +34,8 @@ b8 GameInit(Game* game)
 
 b8 GameFree(Game* game)
 {
+	ShaderPackDestroy(&app.TestPack);
+	
 	AudioSourceStop(&app.TestSource);
 	AudioSourceDestroy(&app.TestSource);
 	
