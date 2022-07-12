@@ -4,9 +4,12 @@
 #include <Core/Event.h>
 #include <Core/Input.h>
 #include <Audio/AudioSource.h>
+#include <Renderer/ShaderCompiler.h>
 
 typedef struct AppData {
     AudioSource TestSource;
+	
+	ShaderModule TestModule;
 } AppData;
 
 static AppData app;
@@ -19,11 +22,17 @@ b8 GameInit(Game* game)
 	AudioSourceSetPitch(1.0f, &app.TestSource);
 	AudioSourcePlay(&app.TestSource);
 	
+	if (!ShaderCompile("Assets/Shaders/Basic/Vertex.vert", &app.TestModule)) {
+		ELSA_ERROR("Failed to compile shader!");
+		return false;
+	}
+	
 	return true;
 }
 
 b8 GameFree(Game* game)
 {
+	ShaderFree(&app.TestModule);
 	AudioSourceStop(&app.TestSource);
 	AudioSourceDestroy(&app.TestSource);
 	

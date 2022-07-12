@@ -16,6 +16,9 @@ typedef struct Buffer Buffer;
 /** @brief Opaque handle representing a GPU texture */
 typedef struct Texture Texture;
 
+/** @brief Opaque handle representing a render pipeline */
+typedef struct RenderPipeline RenderPipeline;
+
 /** @brief Represents the different use cases of a buffer */
 typedef enum BufferUsage {
 	BUFFER_USAGE_VERTEX,
@@ -220,6 +223,33 @@ typedef enum TextureFormat {
     TEXTURE_FORMAT_ASTC_12x12_UNORM_BLOCK = 183,
     TEXTURE_FORMAT_ASTC_12x12_SRGB_BLOCK = 184,
 } TextureFormat;
+
+/** @brief Represents the different shader stages. */
+typedef enum ShaderStage  {
+	/** @brief .vert */
+	SHADER_STAGE_VERTEX,
+	/** @brief .frag */
+	SHADER_STAGE_FRAGMENT,
+	/** @brief .geom */
+	SHADER_STAGE_GEOMETRY,
+	/** @brief .comp */
+	SHADER_STAGE_COMPUTE,
+	/** @brief .tesc */
+	SHADER_STAGE_TESSELLATION_CONTROL,
+	/** @brief .tese */
+	SHADER_STAGE_TESSELLATION_EVALUATION,
+	/** @brief .task */
+	SHADER_STAGE_TASK,
+	/** @brief .mesh */
+	SHADER_STAGE_MESH
+} ShaderStage;
+
+/** @brief Structure representing a shader module */
+typedef struct ShaderModule {
+	ShaderStage Stage;
+	u8* ByteCode;
+	u64 ByteCodeSize;
+} ShaderModule;
 
 /** @brief Represents the render API used in the backend. */
 typedef enum RendererBackendAPI {

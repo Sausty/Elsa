@@ -8,19 +8,12 @@ void VulkanCommandBufferAlloc(VulkanContext* context, VkCommandPool pool, b8 is_
     allocate_info.commandBufferCount = 1;
     allocate_info.pNext = 0;
 	
-    VK_CHECK(vkAllocateCommandBuffers(
-									  context->Device.LogicalDevice,
-									  &allocate_info,
-									  &out_command_buffer->Handle));
+    VK_CHECK(vkAllocateCommandBuffers(context->Device.LogicalDevice, &allocate_info, &out_command_buffer->Handle));
 }
 
 void VulkanCommandBufferFree(VulkanContext* context, VkCommandPool pool, VulkanCommandBuffer* command_buffer)
 {
-	vkFreeCommandBuffers(
-						 context->Device.LogicalDevice,
-						 pool,
-						 1,
-						 &command_buffer->Handle);
+	vkFreeCommandBuffers(context->Device.LogicalDevice, pool, 1, &command_buffer->Handle);
 }
 
 void VulkanCommandBufferBegin(VulkanCommandBuffer* command_buffer, b8 is_single_use)

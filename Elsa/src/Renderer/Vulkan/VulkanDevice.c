@@ -75,10 +75,7 @@ b8 PhysicalDeviceMeetsRequirements(VkPhysicalDevice device, VkSurfaceKHR surface
         (!requirements->Compute || (requirements->Compute && out_queue_info->ComputeFamilyIndex != -1)) &&
         (!requirements->Transfer || (requirements->Transfer && out_queue_info->TransferFamilyIndex != -1))) {
 		
-		VulkanDeviceQuerySwapchainSupport(
-										  device,
-										  surface,
-										  out_swapchain_support);
+		VulkanDeviceQuerySwapchainSupport(device, surface, out_swapchain_support);
 		
         if (out_swapchain_support->FormatCount < 1 || out_swapchain_support->PresentModeCount < 1) {
             if (out_swapchain_support->Formats) {
@@ -187,14 +184,7 @@ b8 SelectPhysicalDevice(VulkanContext* context)
         Darray_Push(requirements.DeviceExtensionNames, &VK_KHR_SWAPCHAIN_EXTENSION_NAME);
 		
         VulkanPhysicalDeviceQueueFamilyInfo queue_info = {};
-        b8 result = PhysicalDeviceMeetsRequirements(
-													physical_devices[i],
-													context->Surface,
-													&properties,
-													&features,
-													&requirements,
-													&queue_info,
-													&context->Device.SwapchainSupport);
+        b8 result = PhysicalDeviceMeetsRequirements(physical_devices[i], context->Surface, &properties, &features, &requirements, &queue_info, &context->Device.SwapchainSupport);
 		
         if (result) {
             context->Device.PhysicalDevice = physical_devices[i];
@@ -274,23 +264,11 @@ b8 VulkanDeviceCreate(VulkanContext* context)
 							&context->Device.LogicalDevice));
 	
     // Get queues.
-    vkGetDeviceQueue(
-					 context->Device.LogicalDevice,
-					 context->Device.GraphicsQueueIndex,
-					 0,
-					 &context->Device.GraphicsQueue);
+    vkGetDeviceQueue(context->Device.LogicalDevice, context->Device.GraphicsQueueIndex, 0, &context->Device.GraphicsQueue);
 	
-    vkGetDeviceQueue(
-					 context->Device.LogicalDevice,
-					 context->Device.ComputeQueueIndex,
-					 0,
-					 &context->Device.ComputeQueue);
+    vkGetDeviceQueue(context->Device.LogicalDevice, context->Device.ComputeQueueIndex, 0, &context->Device.ComputeQueue);
 	
-    vkGetDeviceQueue(
-					 context->Device.LogicalDevice,
-					 context->Device.TransferQueueIndex,
-					 0,
-					 &context->Device.TransferQueue);
+    vkGetDeviceQueue(context->Device.LogicalDevice, context->Device.TransferQueueIndex, 0, &context->Device.TransferQueue);
 	
 	VkCommandPoolCreateInfo pool_create_info = {VK_STRUCTURE_TYPE_COMMAND_POOL_CREATE_INFO};
     pool_create_info.queueFamilyIndex = context->Device.GraphicsQueueIndex;

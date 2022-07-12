@@ -88,10 +88,7 @@ void Create(VulkanContext* context, u32 width, u32 height, VulkanSwapchain* swap
     }
 	
     // Requery swapchain support.
-    VulkanDeviceQuerySwapchainSupport(
-									  context->Device.PhysicalDevice,
-									  context->Surface,
-									  &context->Device.SwapchainSupport);
+    VulkanDeviceQuerySwapchainSupport(context->Device.PhysicalDevice, context->Surface, &context->Device.SwapchainSupport);
 	
     // Swapchain extent
     if (context->Device.SwapchainSupport.Capabilities.currentExtent.width != UINT32_MAX) {
