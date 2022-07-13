@@ -196,7 +196,6 @@ b8 ShaderPackCreate(const char* path, ShaderPack* out_pack)
 				ELSA_FATAL("Failed to read binary shader file!");
 				return false;
 			}
-			ELSA_INFO("%u", module.ByteCodeSize);
 			module.ByteCode = bytes_array;
 			
 			Darray_Push(out_pack->Modules, module);
