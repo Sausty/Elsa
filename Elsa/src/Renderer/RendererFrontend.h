@@ -35,6 +35,22 @@ ELSA_API void RendererFrontendShutdown();
 ELSA_API void RendererFrontendResized(u16 width, u16 height);
 
 /**
+* @brief Creates a render pipeline.
+*
+* @param pack The shader pack to use.
+* @param pipeline A pointer that will hold the created pipeline.
+* @returns True on success; otherwise false.
+*/
+ELSA_API b8 RendererFrontendRenderPipelineCreate(ShaderPack* pack, RenderPipeline* pipeline);
+
+/**
+* @brief Destroys a render pipeline.
+*
+* @param pipeline The render pipeline to destroy.
+*/
+ELSA_API void RendererFrontendRenderPipelineDestroy(RenderPipeline* pipeline);
+
+/**
  * @brief Draws the frame.
  * 
  * @param delta_time The number of seconds past after the last drawn frame.

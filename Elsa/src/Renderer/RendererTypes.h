@@ -16,9 +16,6 @@ typedef struct Buffer Buffer;
 /** @brief Opaque handle representing a GPU texture */
 typedef struct Texture Texture;
 
-/** @brief Opaque handle representing a render pipeline */
-typedef struct RenderPipeline RenderPipeline;
-
 /** @brief Represents the different use cases of a buffer */
 typedef enum BufferUsage {
 	BUFFER_USAGE_VERTEX,
@@ -252,6 +249,8 @@ typedef struct ShaderModule {
 	u8* ByteCode;
 	/** @brief The size of the SPIR-V bytecode. */
 	u64 ByteCodeSize;
+	/** @brief Whether or not the shader was read from a binary file. */
+	b8 Binary;
 } ShaderModule;
 
 /** @brief Structure representing a pack of shaders. */
@@ -275,6 +274,13 @@ typedef enum RendererBackendAPI {
     /** @brief (UNSUPPORTED: SWITCH) The Deko3D backend */
     RENDERER_BACKEND_API_DEKO3D
 } RendererBackendAPI;
+
+/** @brief Structure representing a render pipeline */
+typedef struct RenderPipeline {
+	ShaderPack* Pack;
+	
+	void* Internal;
+} RenderPipeline;
 
 /**
  * @brief A generic "interface" for the backend. The renderer backend
@@ -326,6 +332,22 @@ typedef struct RendererBackend {
 * @param buffer The buffer to destroy.
 */
 	void (*BufferFree)(struct RendererBackend* backend, Buffer* buffer);
+	
+	/**
+* @brief Creates a render pipeline.
+* @param backend A pointer to the generic backend interface.
+* @param pack The shader pack that the pipeline will use.
+* @param pipeline A pointer to hold the resulting pipeline.
+* @returns True on success; otherwise false.
+*/
+	b8 (*RenderPipelineCreate)(struct RendererBackend* backend, ShaderPack* pack, RenderPipeline* pipeline);
+	
+	/**
+* @brief Destroys a render pipeline.
+* @param backend A pointer to the generic backend interface.
+* @param pipeline The pipeline to destroy.
+*/
+	void (*RenderPipelineDestroy)(struct RendererBackend* backend, RenderPipeline* pipeline);
 	
 	/**
 	 * @brief Performs setup routines required at the start of a frame.

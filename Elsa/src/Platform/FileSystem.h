@@ -88,14 +88,23 @@ ELSA_API b8 FileSystemWriteLine(FileHandle* handle, const char* text);
  */
 ELSA_API b8 FileSystemRead(FileHandle* handle, u64 data_size, void* out_data, u64* out_bytes_read);
 
+/**
+* @brief Reads all the SPIR-V bytes of the given file.
+* @param handle A pointer to a FileHandle structure.
+* @param out_size A pointer to a number which will be populated by the number of bytes read from the file.
+* @returns The allocated byte buffer. Must be freed by the caller.
+*/
+ELSA_API u32* FileSystemReadSPIRV(FileHandle* handle, u64* out_size);
+
 /** 
  * @brief Reads all bytes of data into out_bytes. 
  * @param handle A pointer to a file_handle structure.
  * @param out_bytes A byte array which will be populated by this method.
  * @param out_bytes_read A pointer to a number which will be populated with the number of bytes actually read from the file.
+* @param align Align the read bytes to 4.
  * @returns True if successful; otherwise false.
  */
-ELSA_API b8 FileSystemReadBytes(FileHandle* handle, u8* out_bytes, u64* out_bytes_read);
+ELSA_API b8 FileSystemReadBytes(FileHandle* handle, u8* out_bytes, u64* out_bytes_read, b8 align);
 
 /** 
  * @brief Reads all characters of data into out_text. 

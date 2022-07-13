@@ -3,6 +3,8 @@
 #include <Core/Logger.h>
 #include <Core/MemTracker.h>
 
+#include <Platform/Platform.h>
+
 #include <stdio.h>
 #include <string.h>
 #include <sys/stat.h>
@@ -106,17 +108,39 @@ b8 FileSystemRead(FileHandle* handle, u64 data_size, void* out_data, u64* out_by
     return false;
 }
 
-b8 FileSystemReadBytes(FileHandle* handle, u8* out_bytes, u64* out_bytes_read)
+u32* FileSystemReadSPIRV(FileHandle* handle, u64* out_size)
+{
+	long currentpos = ftell(handle->Handle);
+	fseek(handle->Handle, 0, SEEK_END);
+	long size = ftell(handle->Handle);
+	fseek(handle->Handle, currentpos, SEEK_SET);
+	
+	u64 filesizepadded = (size % 4 == 0 ? size * 4 : (size + 1) * 4) / 4;
+	
+	u8* buffer = PlatformAlloc(filesizepadded);
+	fread(buffer, size, sizeof(char), handle->Handle);
+	*out_size = filesizepadded;
+	return (u32*)buffer;
+}
+
+b8 FileSystemReadBytes(FileHandle* handle, u8* out_bytes, u64* out_bytes_read, b8 align)
 {
 	if (handle->Handle && out_bytes && out_bytes_read) {
         // File size
         u64 size = 0;
+		u64 size_padded;
         if(!FileSystemSize(handle, &size)) {
             return false;
         }
-		
-        *out_bytes_read = fread(out_bytes, 1, size, (FILE*)handle->Handle);
-        return *out_bytes_read == size;
+		if (align) {
+			size_padded = (size % 4 == 0 ? size * 4 : (size + 1) * 4) / 4;
+			*out_bytes_read = size_padded;
+			fread(out_bytes, 1, size, (FILE*)handle->Handle);
+			return true;
+		} else {
+			*out_bytes_read = fread(out_bytes, 1, size, (FILE*)handle->Handle);
+			return *out_bytes_read == size;
+		}
     }
     return false;
 }

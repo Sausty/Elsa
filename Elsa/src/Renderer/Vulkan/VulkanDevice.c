@@ -24,7 +24,7 @@ typedef struct VulkanPhysicalDeviceQueueFamilyInfo {
     u32 TransferFamilyIndex;
 } VulkanPhysicalDeviceQueueFamilyInfo;
 
-b8 PhysicalDeviceMeetsRequirements(VkPhysicalDevice device, VkSurfaceKHR surface, const VkPhysicalDeviceProperties* properties, const VkPhysicalDeviceFeatures* features, const VulkanPhysicalDeviceRequirements* requirements, VulkanPhysicalDeviceQueueFamilyInfo* out_queue_info,
+b8 PhysicalDeviceMeetsRequirements(VkPhysicalDevice device, VkSurfaceKHR surface, const VkPhysicalDeviceProperties* properties, const VkPhysicalDeviceFeatures2* features, const VulkanPhysicalDeviceRequirements* requirements, VulkanPhysicalDeviceQueueFamilyInfo* out_queue_info,
 								   VulkanSwapchainSupport* out_swapchain_support)
 {
 	if (requirements->DiscreteGPU) {
@@ -124,19 +124,19 @@ b8 PhysicalDeviceMeetsRequirements(VkPhysicalDevice device, VkSurfaceKHR surface
         }
 		
         // Sampler anisotropy
-        if (requirements->SamplerAnisotropy && !features->samplerAnisotropy) {
+        if (requirements->SamplerAnisotropy && !features->features.samplerAnisotropy) {
             ELSA_INFO("Device does not support samplerAnisotropy, skipping.");
             return false;
         }
 		
         // Pipeline statistics query
-        if (requirements->PipelineStatisticsQuery && !features->pipelineStatisticsQuery) {
+        if (requirements->PipelineStatisticsQuery && !features->features.pipelineStatisticsQuery) {
             ELSA_INFO("Device does not support pipelineStaticsQuery, skipping.");
             return false;
         }
 		
         // Fill mode non solid
-        if (requirements->FillModeNonSolid && !features->fillModeNonSolid) {
+        if (requirements->FillModeNonSolid && !features->features.fillModeNonSolid) {
             ELSA_INFO("Device does not support fillModeNonSolid, skipping.");
             return false;
         }
@@ -164,8 +164,9 @@ b8 SelectPhysicalDevice(VulkanContext* context)
         VkPhysicalDeviceProperties properties;
         vkGetPhysicalDeviceProperties(physical_devices[i], &properties);
 		
-        VkPhysicalDeviceFeatures features;
-        vkGetPhysicalDeviceFeatures(physical_devices[i], &features);
+        VkPhysicalDeviceFeatures2 features;
+		features.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_FEATURES_2;
+        vkGetPhysicalDeviceFeatures(physical_devices[i], &features.features);
 		
         VkPhysicalDeviceMemoryProperties memory;
         vkGetPhysicalDeviceMemoryProperties(physical_devices[i], &memory);
@@ -226,10 +227,15 @@ b8 VulkanDeviceCreate(VulkanContext* context)
         queue_create_infos[i].pQueuePriorities = &queue_priority;
     }
 	
-    VkPhysicalDeviceFeatures device_features = {};
-    device_features.samplerAnisotropy = VK_TRUE;  // Request anistrophy
-    device_features.fillModeNonSolid = VK_TRUE;
-    device_features.pipelineStatisticsQuery = VK_TRUE;
+	VkPhysicalDeviceDynamicRenderingFeaturesKHR dynamic_features = { 0 };
+	dynamic_features.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_DYNAMIC_RENDERING_FEATURES_KHR;
+	dynamic_features.dynamicRendering = VK_TRUE;
+	dynamic_features.pNext = NULL;
+	
+    context->Device.Features.features.samplerAnisotropy = VK_TRUE;  // Request anistrophy
+    context->Device.Features.features.fillModeNonSolid = VK_TRUE;
+    context->Device.Features.features.pipelineStatisticsQuery = VK_TRUE;
+	context->Device.Features.pNext = &dynamic_features;
 	
     u32 available_extension_count = 0;
     VkExtensionProperties* available_extensions = 0;
@@ -248,13 +254,11 @@ b8 VulkanDeviceCreate(VulkanContext* context)
     VkDeviceCreateInfo device_create_info = {VK_STRUCTURE_TYPE_DEVICE_CREATE_INFO};
     device_create_info.queueCreateInfoCount = index;
     device_create_info.pQueueCreateInfos = queue_create_infos;
-    device_create_info.pEnabledFeatures = &device_features;
     device_create_info.enabledExtensionCount = 1;
     device_create_info.ppEnabledExtensionNames = extension_names;
-	
-    // Deprecated and ignored, so pass nothing.
     device_create_info.enabledLayerCount = 0;
     device_create_info.ppEnabledLayerNames = 0;
+	device_create_info.pNext = &context->Device.Features;
 	
     // Create the device.
     VK_CHECK(vkCreateDevice(

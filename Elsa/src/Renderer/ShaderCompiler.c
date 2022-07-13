@@ -136,6 +136,7 @@ b8 ShaderPackCreate(const char* path, ShaderPack* out_pack)
 		
 		for (u32 i = 0; i < Darray_Length(filenames); i++) {
 			ShaderModule module;
+			module.Binary = false;
 			
 			// Compile shader
 			char shader_source_path[PLATFORM_MAX_PATH];
@@ -174,6 +175,7 @@ b8 ShaderPackCreate(const char* path, ShaderPack* out_pack)
 		
 		for (u32 i = 0; i < Darray_Length(filenames); i++) {
 			ShaderModule module;
+			module.Binary = true;
 			
 			char shader_source_path[PLATFORM_MAX_PATH];
 			sprintf(shader_source_path, "%s/%s", path, filenames[i]);
@@ -185,18 +187,12 @@ b8 ShaderPackCreate(const char* path, ShaderPack* out_pack)
 			char shader_bin_path[PLATFORM_MAX_PATH];
 			sprintf(shader_bin_path, "%s/bin/%s.spv", path, filenames[i]);
 			FileHandle file_handle;
-			u64 bytes_written;
 			if (!FileSystemOpen(shader_bin_path, FILE_MODE_READ, true, &file_handle)) {
 				ELSA_FATAL("Failed to open binary file");
 				return false;
 			}
 			
-			u8 bytes_array[8192];
-			if (!FileSystemReadBytes(&file_handle, bytes_array, &module.ByteCodeSize)) {
-				ELSA_FATAL("Failed to read binary shader file!");
-				return false;
-			}
-			module.ByteCode = bytes_array;
+			module.ByteCode = (u8*)FileSystemReadSPIRV(&file_handle, &module.ByteCodeSize);
 			
 			Darray_Push(out_pack->Modules, module);
 			
@@ -211,5 +207,11 @@ b8 ShaderPackCreate(const char* path, ShaderPack* out_pack)
 
 void ShaderPackDestroy(ShaderPack* pack)
 {
+	for (u32 i = 0; i < Darray_Length(pack->Modules); i++) {
+		ShaderModule* module = &pack->Modules[i];
+		if (module->Binary) {
+			PlatformFree(module->ByteCode);
+		}
+	}
 	Darray_Destroy(pack->Modules);
 }

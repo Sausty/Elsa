@@ -15,9 +15,15 @@
 
 b8 VulkanRendererBackendInit(RendererBackend* backend);
 void VulkanRendererBackendShutdown(RendererBackend* backend);
+
 void VulkanRendererBackendResized(RendererBackend* backend, u16 width, u16 height);
+
 Buffer* VulkanRendererBackendBufferCreate(RendererBackend* backend, u64 size, BufferUsage usage);
 void VulkanRendererBackendBufferFree(RendererBackend* backend, Buffer* buffer);
+
+b8 VulkanRendererBackendRenderPipelineCreate(RendererBackend* backend, ShaderPack* pack, RenderPipeline* pipeline);
+void VulkanRendererBackendRenderPipelineDestroy(RendererBackend* backend, RenderPipeline* pipeline);
+
 b8 VulkanRendererBackendBeginFrame(RendererBackend* backend, f32 delta_time);
 b8 VulkanRendererBackendEndFrame(RendererBackend* backend, f32 delta_time);
 

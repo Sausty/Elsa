@@ -44,6 +44,16 @@ typedef struct Texture {
 	u32 Height;
 } Texture;
 
+typedef struct VulkanShader {
+	VkShaderModule Module;
+	VkShaderStageFlagBits Stage;
+} VulkanShader;
+
+typedef struct VulkanRenderPipeline {
+	VkPipeline Pipeline;
+	VkPipelineLayout PipelineLayout;
+} VulkanRenderPipeline;
+
 typedef struct VulkanCommandBuffer {
 	VkCommandBuffer Handle;
 } VulkanCommandBuffer;
@@ -80,7 +90,7 @@ typedef struct VulkanDevice {
 	VkCommandPool GraphicsCommandPool;
 	
     VkPhysicalDeviceProperties Properties;
-    VkPhysicalDeviceFeatures Features;
+    VkPhysicalDeviceFeatures2 Features;
     
     VkFormat DepthFormat;
 } VulkanDevice;

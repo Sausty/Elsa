@@ -12,6 +12,7 @@
 #include "VulkanAllocator.h"
 #include "VulkanSwapchain.h"
 #include "VulkanCommandBuffer.h"
+#include "VulkanRenderPipeline.h"
 
 static VulkanContext context;
 
@@ -255,6 +256,21 @@ b8 VulkanRendererBackendEndFrame(RendererBackend* backend, f32 delta_time)
 	VulkanSwapchainPresent(&context, &context.Swapchain, context.Device.GraphicsQueue, context.ImageRenderedSemaphore, context.ImageIndex);
 	
 	return true;
+}
+
+b8 VulkanRendererBackendRenderPipelineCreate(RendererBackend* backend, ShaderPack* pack, RenderPipeline* pipeline)
+{
+	if (!VulkanRenderPipelineCreate(&context, pack, pipeline)) {
+		ELSA_FATAL("Failed to create render pipeline!");
+		return false;
+	}
+	
+	return true;
+}
+
+void VulkanRendererBackendRenderPipelineDestroy(RendererBackend* backend, RenderPipeline* pipeline)
+{
+	VulkanRenderPipelineDestroy(&context, pipeline);
 }
 
 #endif
