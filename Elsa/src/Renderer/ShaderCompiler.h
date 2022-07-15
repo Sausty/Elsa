@@ -1,7 +1,7 @@
 /**
  * @file ShaderCompiler.h
  * @author Milo Heinrich (MikuoH15TH@gmail.com)
- * @brief This file contains functions to compile shader files.
+ * @brief This file contains functions to compile shader files, load material layouts and compile shader packs.
  * @version 1.0
  * @date 2022-07-12
  */
