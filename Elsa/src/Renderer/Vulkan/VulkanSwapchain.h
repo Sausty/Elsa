@@ -1,5 +1,5 @@
 /**
- * @file VulkanTypes.h
+ * @file VulkanSwapchain.h
  * @author Milo Heinrich (MikuoH15TH@gmail.com)
  * @brief This file contains type functions for swapchain stuff.
  * @version 1.0

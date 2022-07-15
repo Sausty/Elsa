@@ -1,7 +1,7 @@
 /**
- * @file RendererTypes.h
+ * @file VulkanRenderPipeline.h
  * @author Milo Heinrich (MikuoH15TH@gmail.com)
- * @brief This file contains type definitions regarding renderer data.
+ * @brief This file contains type definitions regarding vulkan render pipelines.
  * @version 1.0
  * @date 2022-07-13
  */
