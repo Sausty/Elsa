@@ -1,0 +1,9 @@
+[Shaders]
+	PackDirectory = "Assets/Shaders/Basic"
+
+[RenderProperties]
+	CullMode = "Back"
+	DepthOperation = "Less"
+	FrontFace = "CW"
+	PrimitiveTopology = "TriangleList"
+	PolygonMode = "Fill"*

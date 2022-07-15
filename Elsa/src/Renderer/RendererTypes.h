@@ -32,6 +32,50 @@ typedef enum TextureUsage {
 	TEXTURE_USAGE_STORAGE
 } TextureUsage;
 
+/** @brief Represents the different primitive topologies. */
+typedef enum PrimitiveTopology {
+	PRIMITIVE_TOPOLOGY_POINT_LIST = 0,
+	PRIMITIVE_TOPOLOGY_LINE_LIST = 1,
+	PRIMITIVE_TOPOLOGY_LINE_STRIP = 2,
+	PRIMITIVE_TOPOLOGY_TRIANGLE_LIST = 3,
+	PRIMITIVE_TOPOLOGY_TRIANGLE_STRIP = 4
+} PrimitiveTopology;
+
+/** @brief Represents the different polygon modes. */
+typedef enum PolygonMode {
+	POLYGON_MODE_FILL = 0,
+	POLYGON_MODE_LINE = 1,
+	POLYGON_MODE_POINT = 2
+} PolygonMode;
+
+/** @brief Represents the different cull modes. */
+typedef enum CullMode {
+	CULL_MODE_NONE = 0,
+	CULL_MODE_FRONT = 0x00000001,
+	CULL_MODE_BACK =  0x00000002,
+	CULL_MODE_FRONT_AND_BACK =  0x00000003
+} CullMode;
+
+/** @brief Represents the winding orders of a face. */
+typedef enum FrontFace {
+	/** @brief Counter clockwise */
+	FRONT_FACE_CCW = 0,
+	/** @brief Clockwise */
+	FRONT_FACE_CW = 1
+} FrontFace;
+
+/** @brief Represents the different compare operations. */
+typedef enum CompareOP {
+	COMPARE_OP_NEVER = 0,
+	COMPARE_OP_LESS = 1,
+	COMPARE_OP_EQUAL = 2,
+	COMPARE_OP_LESS_EQUAL = 3,
+	COMPARE_OP_GREATER = 4,
+	COMPARE_OP_NOT_EQUAL = 5,
+	COMPARE_OP_GREATER_EQUAL = 6,
+	COMPARE_OP_ALWAYS = 7
+} CompareOP;
+
 /** @brief Represents texture formats */
 typedef enum TextureFormat {
 	TEXTURE_FORMAT_UNDEFINED = 0,
@@ -257,6 +301,9 @@ typedef struct ShaderModule {
 typedef struct ShaderPack {
 	/** @brief An array containing all the shaders in the pack. */
 	ShaderModule* Modules;
+	
+	/** @brief The path of the shader pack. */
+	const char* Path;
 } ShaderPack;
 
 /** @brief Represents the render API used in the backend. */
@@ -275,12 +322,36 @@ typedef enum RendererBackendAPI {
     RENDERER_BACKEND_API_DEKO3D
 } RendererBackendAPI;
 
+/** @brief Structure holding data about material configuration */
+typedef struct MaterialConfig {
+	PrimitiveTopology Topology;
+	PolygonMode PolyMode;
+	CullMode Cull;
+	FrontFace Face;
+	CompareOP OP;
+} MaterialConfig;
+
 /** @brief Structure representing a render pipeline */
 typedef struct RenderPipeline {
 	ShaderPack* Pack;
-	
+	MaterialConfig Config;
 	void* Internal;
 } RenderPipeline;
+
+/** @brief Structure representing a material layout. */
+typedef struct MaterialLayout {
+	/** @brief The shader pack of the material */
+	ShaderPack Pack;
+	
+	/** @brief The path of the material layout */
+	const char* Path;
+	
+	/** @brief The render pipeline of the material */
+	RenderPipeline Pipeline;
+	
+	/** @brief The different configurations of the material */
+	MaterialConfig Config;
+} MaterialLayout;
 
 /**
  * @brief A generic "interface" for the backend. The renderer backend

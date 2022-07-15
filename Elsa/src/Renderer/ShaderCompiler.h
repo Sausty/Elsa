@@ -32,4 +32,18 @@ ELSA_API b8 ShaderPackCreate(const char* path, ShaderPack* out_pack);
 */
 ELSA_API void ShaderPackDestroy(ShaderPack* pack);
 
+/**
+* @brief Creates a new material layout from the given file.
+ * @param path The path of the material layout file. Must be a TOML file.
+* @param out_layout A pointer that will hold the resulting material layout.
+* @returns True on success; otherwise false.
+*/
+ELSA_API b8 MaterialLayoutLoad(const char* path, MaterialLayout* layout);
+
+/**
+* @brief Destroys the given material layout.
+* @param layout The material layout to destroy.
+*/
+ELSA_API void MaterialLayoutDestroy(MaterialLayout* layout);
+
 #endif

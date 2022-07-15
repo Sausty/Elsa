@@ -12,8 +12,7 @@
 typedef struct AppData {
     AudioSource TestSource;
 	
-	ShaderPack TestPack;
-	RenderPipeline TestPipeline;
+	MaterialLayout TestLayout;
 } AppData;
 
 static AppData app;
@@ -26,12 +25,8 @@ b8 GameInit(Game* game)
 	AudioSourceSetPitch(1.0f, &app.TestSource);
 	AudioSourcePlay(&app.TestSource);
 	
-	if (!ShaderPackCreate("Assets/Shaders/Basic", &app.TestPack)) {
-		ELSA_FATAL("Failed to load shader pack!");
-		return false;
-	}
-	if (!RendererFrontendRenderPipelineCreate(&app.TestPack, &app.TestPipeline)) {
-		ELSA_FATAL("Failed to create render pipeline!");
+	if (!MaterialLayoutLoad("Assets/Shaders/Basic.toml", &app.TestLayout)) {
+		ELSA_ERROR("Failed to load material layout!");
 		return false;
 	}
 	
@@ -40,8 +35,7 @@ b8 GameInit(Game* game)
 
 b8 GameFree(Game* game)
 {
-	RendererFrontendRenderPipelineDestroy(&app.TestPipeline);
-	ShaderPackDestroy(&app.TestPack);
+	MaterialLayoutDestroy(&app.TestLayout);
 	
 	AudioSourceStop(&app.TestSource);
 	AudioSourceDestroy(&app.TestSource);

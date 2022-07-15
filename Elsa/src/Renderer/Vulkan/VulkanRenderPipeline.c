@@ -255,8 +255,7 @@ b8 VulkanRenderPipelineCreate(VulkanContext* context, ShaderPack* pack, RenderPi
         vertex_input_state_info.vertexAttributeDescriptionCount = vs_input_var_count;
         vertex_input_state_info.pVertexAttributeDescriptions = attribute_descriptions;
 		
-		// TODO(milo): make customisable
-        input_assembly.topology = VK_PRIMITIVE_TOPOLOGY_TRIANGLE_LIST;
+        input_assembly.topology = (VkPrimitiveTopology)pipeline->Config.Topology;;
         input_assembly.primitiveRestartEnable = VK_FALSE;
 	}
 	
@@ -296,13 +295,10 @@ b8 VulkanRenderPipelineCreate(VulkanContext* context, ShaderPack* pack, RenderPi
     rasterizer.sType = VK_STRUCTURE_TYPE_PIPELINE_RASTERIZATION_STATE_CREATE_INFO;
     rasterizer.depthClampEnable = VK_FALSE;
     rasterizer.rasterizerDiscardEnable = VK_FALSE;
-	// TODO(milo): make customisable
-    rasterizer.polygonMode = VK_POLYGON_MODE_FILL;
+    rasterizer.polygonMode = (VkPolygonMode)pipeline->Config.PolyMode;
     rasterizer.lineWidth = 1.0f;
-	// TODO(milo): make customisable
-    rasterizer.cullMode = VK_CULL_MODE_FRONT_BIT;
-	// TODO(milo): make customisable
-    rasterizer.frontFace = VK_FRONT_FACE_CLOCKWISE;
+    rasterizer.cullMode = (VkCullModeFlags)pipeline->Config.Cull;
+    rasterizer.frontFace = (VkFrontFace)pipeline->Config.Face;
     rasterizer.depthBiasEnable = VK_FALSE;
 	
 	VkPipelineMultisampleStateCreateInfo multisampling = {0};
@@ -318,8 +314,7 @@ b8 VulkanRenderPipelineCreate(VulkanContext* context, ShaderPack* pack, RenderPi
     depth_stencil.sType = VK_STRUCTURE_TYPE_PIPELINE_DEPTH_STENCIL_STATE_CREATE_INFO;
     depth_stencil.depthTestEnable = VK_TRUE;
     depth_stencil.depthWriteEnable = VK_TRUE;
-	// TODO(milo): make customisable
-	depth_stencil.depthCompareOp = VK_COMPARE_OP_LESS;
+	depth_stencil.depthCompareOp = (VkCompareOp)pipeline->Config.OP;
     depth_stencil.depthBoundsTestEnable = VK_FALSE;
     depth_stencil.minDepthBounds = 0.0f; // Optional
     depth_stencil.maxDepthBounds = 1.0f; // Optional
