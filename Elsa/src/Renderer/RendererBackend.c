@@ -26,8 +26,9 @@ b8 RendererBackendCreate(RendererBackendAPI api, RendererBackend* out_renderer_b
         out_renderer_backend->Init = VulkanRendererBackendInit;
         out_renderer_backend->Shutdown = VulkanRendererBackendShutdown;
         out_renderer_backend->Resized = VulkanRendererBackendResized;
-		out_renderer_backend->BufferCreate = VulkanRendererBackendBufferCreate,
-		out_renderer_backend->BufferFree = VulkanRendererBackendBufferFree,
+		out_renderer_backend->BufferCreate = VulkanRendererBackendBufferCreate;
+        out_renderer_backend->BufferUpload = VulkanRendererBackendBufferUpload;
+		out_renderer_backend->BufferFree = VulkanRendererBackendBufferFree;
 		out_renderer_backend->RenderPipelineCreate = VulkanRendererBackendRenderPipelineCreate;
 		out_renderer_backend->RenderPipelineDestroy = VulkanRendererBackendRenderPipelineDestroy;
         out_renderer_backend->DescriptorMapCreate = VulkanRendererBackendDescriptorMapCreate;

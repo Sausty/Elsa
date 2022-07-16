@@ -35,6 +35,28 @@ ELSA_API void RendererFrontendShutdown();
 ELSA_API void RendererFrontendResized(u16 width, u16 height);
 
 /**
+ * @brief Creates a GPU buffer.
+ * @param size The size of the buffer to be created.
+ * @param usage The usage for the buffer.
+ * @returns A pointer to the created buffer if successful; otherwise NULL.
+ */
+ELSA_API Buffer* RendererFrontendBufferCreate(u64 size, BufferUsage usage);
+
+/**
+ * @brief Uploads the given data to a GPU buffer.
+ * @param data The data to be uploaded.
+ * @param size The size in bytes of the data.
+ * @param buffer A pointer to the buffer to upload.
+ */
+ELSA_API void RendererFrontendBufferUpload(void* data, u64 size, Buffer* buffer);
+
+/**
+ * @brief Destroys a GPU buffer.
+ * @param buffer The buffer to destroy.
+ */
+ELSA_API void RendererFrontendBufferFree(Buffer* buffer);
+
+/**
 * @brief Creates a render pipeline.
 *
 * @param pack The shader pack to use.
@@ -66,11 +88,17 @@ ELSA_API b8 RendererFrontendDescriptorMapCreate(ShaderPack* pack, DescriptorMap*
 ELSA_API void RendererFrontendDescriptorMapDestroy(DescriptorMap* map);
 
 /**
- * @brief Draws the frame.
- * 
- * @param delta_time The number of seconds past after the last drawn frame.
+ * @brief Begins the frame.
+ * @param delta_time The number of seconds elapsed since the last frame.
  * @returns True on success; otherwise false.
  */
-ELSA_API b8 RendererFrontendDrawFrame(f32 delta_time);
+ELSA_API b8 RendererFrontendBeginFrame(f32 delta_time);
+
+/**
+ * @brief Ends the frame.
+ * @param delta_time The number of seconds elapsed since the last frame.
+ * @returns True on success; otherwise false.
+ */
+ELSA_API b8 RendererFrontendEndFrame(f32 delta_time);
 
 #endif

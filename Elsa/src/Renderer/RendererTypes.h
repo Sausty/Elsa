@@ -441,6 +441,15 @@ typedef struct RendererBackend {
     */
 	Buffer* (*BufferCreate)(struct RendererBackend* backend, u64 size, BufferUsage usage);
 	
+    /**
+     * @brief Uploads the given data to a GPU buffer.
+     * @param backend A pointer to the generic backend interface.
+     * @param data The data to be uploaded.
+     * @param size The size in bytes of the data.
+     * @param buffer A pointer to the buffer to upload.
+     */
+    void (*BufferUpload)(struct RendererBackend* backend, void* data, u64 size, Buffer* buffer);
+
 	/**
     * @brief Destroys a GPU buffer.
     * @param backend A pointer to the generic backend interface.

@@ -19,6 +19,7 @@ void VulkanRendererBackendShutdown(RendererBackend* backend);
 void VulkanRendererBackendResized(RendererBackend* backend, u16 width, u16 height);
 
 Buffer* VulkanRendererBackendBufferCreate(RendererBackend* backend, u64 size, BufferUsage usage);
+void VulkanRendererBackendBufferUpload(RendererBackend* backend, void* data, u64 size, Buffer* buffer);
 void VulkanRendererBackendBufferFree(RendererBackend* backend, Buffer* buffer);
 
 b8 VulkanRendererBackendRenderPipelineCreate(RendererBackend* backend, ShaderPack* pack, DescriptorMap* map, RenderPipeline* pipeline);

@@ -3,6 +3,8 @@
 #include <Core/MemTracker.h>
 #include <Core/Logger.h>
 
+#include <memory.h>
+
 VkBufferUsageFlagBits BufferUsageToVulkan(BufferUsage usage)
 {
 	switch (usage)
@@ -73,6 +75,14 @@ Buffer* VulkanAllocatorBufferCreate(VulkanAllocator* allocator, u64 size, Buffer
 	}
 	
 	return buffer;
+}
+
+void VulkanAllocatorBufferUpload(VulkanAllocator* allocator, u64 size, void* data, Buffer* buffer)
+{
+	void* memory = NULL;
+	vmaMapMemory(allocator->Allocator, buffer->Allocation, &memory);
+	memcpy(memory, data, size);
+	vmaUnmapMemory(allocator->Allocator, buffer->Allocation);
 }
 
 void VulkanAllocatorBufferFree(VulkanAllocator* allocator, Buffer* buffer)

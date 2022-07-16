@@ -49,6 +49,21 @@ void RendererFrontendResized(u16 width, u16 height)
         frontend.backend.Resized(&frontend.backend, width, height);
 }
 
+Buffer* RendererFrontendBufferCreate(u64 size, BufferUsage usage)
+{
+    return frontend.backend.BufferCreate(&frontend.backend, size, usage);
+}
+
+void RendererFrontendBufferUpload(void* data, u64 size, Buffer* buffer)
+{
+    frontend.backend.BufferUpload(&frontend.backend, data, size, buffer);
+}
+
+void RendererFrontendBufferFree(Buffer* buffer)
+{
+    frontend.backend.BufferFree(&frontend.backend, buffer);
+}
+
 b8 RendererFrontendRenderPipelineCreate(ShaderPack* pack, DescriptorMap* map, RenderPipeline* pipeline)
 {
 	return frontend.backend.RenderPipelineCreate(&frontend.backend, pack, map, pipeline);
@@ -69,16 +84,12 @@ void RendererFrontendDescriptorMapDestroy(DescriptorMap* map)
     frontend.backend.DescriptorMapDestroy(&frontend.backend, map);
 }
 
-b8 RendererFrontendDrawFrame(f32 delta_time)
+b8 RendererFrontendBeginFrame(f32 delta_time)
 {
-    if (frontend.backend.BeginFrame(&frontend.backend, delta_time)) {
-		
-        b8 result = frontend.backend.EndFrame(&frontend.backend, delta_time);
-        if (!result) {
-            ELSA_ERROR("RendererBackendEndFrame failed. Application shutting down...");
-            return false;
-        }
-    }
-	
-    return true;
+    return frontend.backend.BeginFrame(&frontend.backend, delta_time);
+}
+
+b8 RendererFrontendEndFrame(f32 delta_time)
+{
+    return frontend.backend.EndFrame(&frontend.backend, delta_time);
 }

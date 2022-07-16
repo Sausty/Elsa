@@ -154,6 +154,11 @@ Buffer* VulkanRendererBackendBufferCreate(RendererBackend* backend, u64 size, Bu
 	return VulkanAllocatorBufferCreate(&context.Allocator, size, usage);
 }
 
+void VulkanRendererBackendBufferUpload(RendererBackend* backend, void* data, u64 size, Buffer* buffer)
+{
+	VulkanAllocatorBufferUpload(&context.Allocator, size, data, buffer);
+}
+
 void VulkanRendererBackendBufferFree(RendererBackend* backend, Buffer* buffer)
 {
 	VulkanAllocatorBufferFree(&context.Allocator, buffer);
@@ -226,6 +231,7 @@ b8 VulkanRendererBackendDescriptorMapCreate(RendererBackend* backend, ShaderPack
 				submap->LayoutCount++;
 			}
 
+			PlatformFree(sets);
 			spvReflectDestroyShaderModule(&reflect);
 
 			map->SubmapCount++;

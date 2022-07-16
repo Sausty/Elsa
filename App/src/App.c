@@ -13,9 +13,16 @@ typedef struct AppData {
     AudioSource TestSource;
 	
 	MaterialLayout TestLayout;
+	Buffer* TriangleVertexBuffer;
 } AppData;
 
 static AppData app;
+
+static float Vertices[] = {
+	0.5f, 0.5f, 0.0f, 1.0f, 0.0f, 0.0f,
+	0.5f,-0.5f, 0.0f, 0.0f, 1.0f, 0.0f,
+	0.0f, 0.5f, 0.0f, 0.0f, 0.0f, 1.0f
+};
 
 b8 GameInit(Game* game)
 {
@@ -29,12 +36,20 @@ b8 GameInit(Game* game)
 		ELSA_ERROR("Failed to load material layout!");
 		return false;
 	}
+
+	app.TriangleVertexBuffer = RendererFrontendBufferCreate(sizeof(Vertices), BUFFER_USAGE_VERTEX);
+	if (!app.TriangleVertexBuffer) {
+		ELSA_ERROR("Failed to create triangle vertex buffer!");
+		return false;
+	}
+	RendererFrontendBufferUpload(Vertices, sizeof(Vertices), app.TriangleVertexBuffer);
 	
 	return true;
 }
 
 b8 GameFree(Game* game)
 {
+	RendererFrontendBufferFree(app.TriangleVertexBuffer);
 	MaterialLayoutDestroy(&app.TestLayout);
 	
 	AudioSourceStop(&app.TestSource);

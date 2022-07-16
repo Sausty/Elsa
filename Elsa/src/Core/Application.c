@@ -112,13 +112,19 @@ b8 ApplicationRun()
             ELSA_ERROR("app_state.game->Update failed.");
             return false;
         }
+
+        if (!RendererFrontendBeginFrame(1.0f)) {
+            ELSA_ERROR("RendererFrontendBeginFrame failed.");
+            return false;
+        }
+
         if (!app_state.game->Render(app_state.game)) {
             ELSA_ERROR("app_state.game->Render failed.");
             return false;
         }
-		
-        if (!RendererFrontendDrawFrame(1.0f)) {
-            ELSA_ERROR("RendererFrontendDrawFrame failed.");
+
+        if (!RendererFrontendEndFrame(1.0f)) {
+            ELSA_ERROR("RendererFrontendEndFrame failed.");
             return false;
         }
     }
