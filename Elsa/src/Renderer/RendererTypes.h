@@ -311,21 +311,35 @@ typedef struct ShaderPack {
 	const char* Path;
 } ShaderPack;
 
+/** @brief Represents the different types of descriptors */
 typedef enum DescriptorType {
+    /** @brief sampler */
 	DESCRIPTOR_TYPE_SAMPLER = 0,
+    /** @brief samplerND */
 	DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER = 1,
+    /** @brief textureND */
 	DESCRIPTOR_TYPE_SAMPLED_IMAGE = 2,
+    /** @brief imageND */
 	DESCRIPTOR_TYPE_STORAGE_IMAGE = 3,
+    /** @brief uniform */
 	DESCRIPTOR_TYPE_UNIFORM_BUFFER = 6,
+    /** @brief uniform buffer */
 	DESCRIPTOR_TYPE_STORAGE_BUFFER = 7
 } DescriptorType;
 
+/** @brief Holds the information of a descriptor */
 typedef struct DescriptorInfo {
+    /** @brief The descriptor's name */
 	char Name[MAX_DESCRIPTOR_NAME];
 	
+    /** @brief The binding index of the descriptor */
 	u32 Binding;
+    /** @brief The number of array members in the descriptor */
 	u32 Count;
+    /** @brief The type of the descriptor. See DescriptorType */
 	u32 Type;
+    /** @brief OPTIONAL: The size of the descriptor buffer */
+    u32 BufferSize;
 } DescriptorInfo;
 
 typedef struct DescriptorLayout {

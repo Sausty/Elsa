@@ -226,6 +226,9 @@ b8 VulkanRendererBackendDescriptorMapCreate(RendererBackend* backend, ShaderPack
 					for (u32 dim = 0; dim < refl_binding->array.dims_count; dim++) {
 						submap->Layouts[i].Descriptors[j].Count *= refl_binding->array.dims[dim];
 					}
+					if (refl_binding->block.size) {
+						submap->Layouts[i].Descriptors[j].BufferSize = refl_binding->block.size;
+					}
 					submap->Layouts[i].DescriptorCount++;
 				}
 				submap->LayoutCount++;
