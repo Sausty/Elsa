@@ -10,6 +10,9 @@
 #ifndef ELSA_DEFINES_H
 #define ELSA_DEFINES_H
 
+/** @brief Just used to mark code blocks */
+#define CODE_BLOCK(name)
+
 /** @brief Signed 8-bit numeric type */
 typedef char i8;
 

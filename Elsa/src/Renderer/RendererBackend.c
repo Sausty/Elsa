@@ -30,6 +30,8 @@ b8 RendererBackendCreate(RendererBackendAPI api, RendererBackend* out_renderer_b
 		out_renderer_backend->BufferFree = VulkanRendererBackendBufferFree,
 		out_renderer_backend->RenderPipelineCreate = VulkanRendererBackendRenderPipelineCreate;
 		out_renderer_backend->RenderPipelineDestroy = VulkanRendererBackendRenderPipelineDestroy;
+        out_renderer_backend->DescriptorMapCreate = VulkanRendererBackendDescriptorMapCreate;
+        out_renderer_backend->DescriptorMapDestroy = VulkanRendererBackendDescriptorMapDestroy;
         out_renderer_backend->BeginFrame = VulkanRendererBackendBeginFrame;
         out_renderer_backend->EndFrame = VulkanRendererBackendEndFrame;
 		

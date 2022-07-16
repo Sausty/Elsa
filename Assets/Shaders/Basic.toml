@@ -6,4 +6,4 @@
 	DepthOperation = "Less"
 	FrontFace = "CW"
 	PrimitiveTopology = "TriangleList"
-	PolygonMode = "Fill"*
+	PolygonMode = "Fill"

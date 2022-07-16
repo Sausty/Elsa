@@ -10,6 +10,9 @@
 
 #include <Defines.h>
 
+/** @brief The max name of a reflect descriptor binding */
+#define MAX_DESCRIPTOR_NAME 128
+
 /** @brief Opaque handle representing a GPU buffer */
 typedef struct Buffer Buffer;
 
@@ -268,21 +271,23 @@ typedef enum TextureFormat {
 /** @brief Represents the different shader stages. */
 typedef enum ShaderStage  {
 	/** @brief .vert */
-	SHADER_STAGE_VERTEX,
+	SHADER_STAGE_VERTEX = 0,
 	/** @brief .frag */
-	SHADER_STAGE_FRAGMENT,
+	SHADER_STAGE_FRAGMENT = 1,
 	/** @brief .geom */
-	SHADER_STAGE_GEOMETRY,
+	SHADER_STAGE_GEOMETRY = 2,
 	/** @brief .comp */
-	SHADER_STAGE_COMPUTE,
+	SHADER_STAGE_COMPUTE = 3,
 	/** @brief .tesc */
-	SHADER_STAGE_TESSELLATION_CONTROL,
+	SHADER_STAGE_TESSELLATION_CONTROL = 4,
 	/** @brief .tese */
-	SHADER_STAGE_TESSELLATION_EVALUATION,
+	SHADER_STAGE_TESSELLATION_EVALUATION = 5,
 	/** @brief .task */
-	SHADER_STAGE_TASK,
+	SHADER_STAGE_TASK = 6,
 	/** @brief .mesh */
-	SHADER_STAGE_MESH
+	SHADER_STAGE_MESH = 7,
+	
+	SHADER_STAGE_MAX_STAGES
 } ShaderStage;
 
 /** @brief Structure representing a shader module */
@@ -305,6 +310,42 @@ typedef struct ShaderPack {
 	/** @brief The path of the shader pack. */
 	const char* Path;
 } ShaderPack;
+
+typedef enum DescriptorType {
+	DESCRIPTOR_TYPE_SAMPLER = 0,
+	DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER = 1,
+	DESCRIPTOR_TYPE_SAMPLED_IMAGE = 2,
+	DESCRIPTOR_TYPE_STORAGE_IMAGE = 3,
+	DESCRIPTOR_TYPE_UNIFORM_BUFFER = 6,
+	DESCRIPTOR_TYPE_STORAGE_BUFFER = 7
+} DescriptorType;
+
+typedef struct DescriptorInfo {
+	char Name[MAX_DESCRIPTOR_NAME];
+	
+	u32 Binding;
+	u32 Count;
+	u32 Type;
+} DescriptorInfo;
+
+typedef struct DescriptorLayout {
+	DescriptorInfo Descriptors[32];
+	u32 DescriptorCount;
+} DescriptorLayout;
+
+typedef struct DescriptorSubmap {
+	DescriptorLayout Layouts[8];
+    u32 LayoutCount;
+
+	ShaderStage Stage;
+} DescriptorSubmap;
+
+typedef struct DescriptorMap {
+	DescriptorSubmap Submaps[SHADER_STAGE_MAX_STAGES];
+	u32 SubmapCount;
+	
+	void* Internal;
+} DescriptorMap;
 
 /** @brief Represents the render API used in the backend. */
 typedef enum RendererBackendAPI {
@@ -351,6 +392,9 @@ typedef struct MaterialLayout {
 	
 	/** @brief The different configurations of the material */
 	MaterialConfig Config;
+	
+	/** @brief The descriptor map of the material */
+	DescriptorMap DescMap;
 } MaterialLayout;
 
 /**
@@ -365,61 +409,78 @@ typedef struct RendererBackend {
     RendererBackendAPI API;
 	
     /**
-     * @brief Initializes the backend.
-     *
-     * @param backend A pointer to the generic backend interface.
-     * @returns True if initialized successfully; otherwise false.
-     */
+    * @brief Initializes the backend.
+    *
+    * @param backend A pointer to the generic backend interface.
+    * @returns True if initialized successfully; otherwise false.
+    */
     b8 (*Init)(struct RendererBackend* backend);
 	
     /**
-     * @brief Shuts the renderer backend down.
-     *
-     * @param backend A pointer to the generic backend interface.
-     */
+     @brief Shuts the renderer backend down.
+    
+     @param backend A pointer to the generic backend interface.
+    */
     void (*Shutdown)(struct RendererBackend* backend);
 	
     /**
-     * @brief Handles window resizes.
-     *
-     * @param backend A pointer to the generic backend interface.
-     * @param width The new window width.
-     * @param height The new window height.
-     */
+    * @brief Handles window resizes.
+    *
+    * @param backend A pointer to the generic backend interface.
+    * @param width The new window width.
+    * @param height The new window height.
+    */
     void (*Resized)(struct RendererBackend* backend, u16 width, u16 height);
 	
 	/**
-* @brief Creates a GPU buffer.
-* @param backend A pointer to the generic backend interface.
-* @param size The size of the buffer to be created.
-* @param usage The usage for the buffer.
-* @returns A pointer to the created buffer if successful; otherwise NULL.
-*/
+    * @brief Creates a GPU buffer.
+    * @param backend A pointer to the generic backend interface.
+    * @param size The size of the buffer to be created.
+    * @param usage The usage for the buffer.
+    * @returns A pointer to the created buffer if successful; otherwise NULL.
+    */
 	Buffer* (*BufferCreate)(struct RendererBackend* backend, u64 size, BufferUsage usage);
 	
 	/**
-* @brief Destroys a GPU buffer.
-* @param backend A pointer to the generic backend interface.
-* @param buffer The buffer to destroy.
-*/
+    * @brief Destroys a GPU buffer.
+    * @param backend A pointer to the generic backend interface.
+    * @param buffer The buffer to destroy.
+    */
 	void (*BufferFree)(struct RendererBackend* backend, Buffer* buffer);
 	
 	/**
-* @brief Creates a render pipeline.
-* @param backend A pointer to the generic backend interface.
-* @param pack The shader pack that the pipeline will use.
-* @param pipeline A pointer to hold the resulting pipeline.
-* @returns True on success; otherwise false.
-*/
-	b8 (*RenderPipelineCreate)(struct RendererBackend* backend, ShaderPack* pack, RenderPipeline* pipeline);
+    * @brief Creates a render pipeline.
+    * @param backend A pointer to the generic backend interface.
+    * @param pack The shader pack that the pipeline will use.
+    * @param map The descriptor map that the pipeline will use. Can be NULL.
+    * @param pipeline A pointer to hold the resulting pipeline.
+    * @returns True on success; otherwise false.
+    */
+	b8 (*RenderPipelineCreate)(struct RendererBackend* backend, ShaderPack* pack, DescriptorMap* map, RenderPipeline* pipeline);
 	
 	/**
-* @brief Destroys a render pipeline.
-* @param backend A pointer to the generic backend interface.
-* @param pipeline The pipeline to destroy.
-*/
+    * @brief Destroys a render pipeline.
+    * @param backend A pointer to the generic backend interface.
+    * @param pipeline The pipeline to destroy.
+    */
 	void (*RenderPipelineDestroy)(struct RendererBackend* backend, RenderPipeline* pipeline);
 	
+    /**
+    * @brief Creates a backend for the descriptor map.
+    * @param backend A pointer to the generic backend interface.
+    * @param pack The shader pack that the descriptor map will use.
+    * @param map A pointer to hold the resulting descriptor map.
+    * @returns True on success; otherwise false.
+    */
+    b8 (*DescriptorMapCreate)(struct RendererBackend* backend, ShaderPack* pack, DescriptorMap* map);
+
+    /**
+    * @brief Destroys a descriptor map.
+    * @param backend A pointer to the generic backend interface.
+    * @param map The descriptor map to destroy.
+    */
+    void (*DescriptorMapDestroy)(struct RendererBackend* backend, DescriptorMap* map);
+
 	/**
 	 * @brief Performs setup routines required at the start of a frame.
 	 * @note A false result does not necessarily indicate failure. It can also specify that

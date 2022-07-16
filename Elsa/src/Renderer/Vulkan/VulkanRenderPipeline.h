@@ -10,7 +10,7 @@
 
 #include "VulkanTypes.h"
 
-b8 VulkanRenderPipelineCreate(VulkanContext* context, ShaderPack* pack, RenderPipeline* pipeline);
+b8 VulkanRenderPipelineCreate(VulkanContext* context, ShaderPack* pack, DescriptorMap* map, RenderPipeline* pipeline);
 void VulkanRenderPipelineDestroy(VulkanContext* context, RenderPipeline* pipeline);
 
 #endif

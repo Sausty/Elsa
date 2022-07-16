@@ -11,6 +11,7 @@
 #include <stdio.h>
 
 #include <shaderc/shaderc.h>
+#include <SPIRV/spirv_reflect.h>
 #include <TOML/toml.h>
 
 ShaderStage GetStageFromString(const char* extension)
@@ -229,72 +230,90 @@ b8 MaterialLayoutLoad(const char* path, MaterialLayout* layout)
 {
 	layout->Path = path;
 	
-	FILE* fp = NULL;
-	char errbuf[200] = {0};
-	
-	fp = fopen(path, "r");
-	if (!fp) {
-		ELSA_FATAL("Failed to load material layout file: %s", path);
-		return false;
+	CODE_BLOCK("Layout config")
+	{
+		FILE* fp = NULL;
+		char errbuf[200] = {0};
+		
+		fp = fopen(path, "r");
+		if (!fp) {
+			ELSA_FATAL("Failed to load material layout file: %s", path);
+			return false;
+		}
+		
+		toml_table_t* conf = toml_parse_file(fp, errbuf, sizeof(errbuf));
+		fclose(fp);
+		
+		if (!conf) {
+			ELSA_FATAL("Failed to parse TOML material layout: %s", path);
+			return false;
+		}
+		
+		toml_table_t* shaders = toml_table_in(conf, "Shaders");
+		if (!shaders) {
+			ELSA_FATAL("Failed to parse shaders table from material layout: %s", path);
+			return false;
+		}
+		
+		toml_table_t* render_properties = toml_table_in(conf, "RenderProperties");
+		if (!render_properties) {
+			ELSA_FATAL("Failed to parse render properties table from material layout: %s", path);
+			return false;
+		}
+		
+		// Shaders
+		toml_datum_t pack_directory = toml_string_in(shaders, "PackDirectory");
+		ShaderPackCreate(pack_directory.u.s, &layout->Pack);
+		PlatformFree(pack_directory.u.s);
+		
+		// Render properties
+		toml_datum_t cull_mode = toml_string_in(render_properties, "CullMode");
+		layout->Pipeline.Config.Cull = GetCullModeFromString(cull_mode.u.s);
+		PlatformFree(cull_mode.u.s);
+		
+		toml_datum_t depth_op = toml_string_in(render_properties, "DepthOperation");
+		layout->Pipeline.Config.OP = GetCompareOPFromString(depth_op.u.s);
+		PlatformFree(depth_op.u.s);
+		
+		toml_datum_t front_face = toml_string_in(render_properties, "FrontFace");
+		layout->Pipeline.Config.Face = GetFrontFaceFromString(front_face.u.s);
+		PlatformFree(depth_op.u.s);
+		
+		toml_datum_t topology = toml_string_in(render_properties, "PrimitiveTopology");
+		layout->Pipeline.Config.Topology = GetPrimitiveTopologyFromString(topology.u.s);
+		PlatformFree(topology.u.s);
+		
+		toml_datum_t polygon_mode = toml_string_in(render_properties, "PolygonMode");
+		layout->Pipeline.Config.PolyMode = GetPolygonModeFromString(polygon_mode.u.s);
+		PlatformFree(polygon_mode.u.s);
+		
+		layout->Config = layout->Pipeline.Config;
+		
+		toml_free(conf);
 	}
 	
-	toml_table_t* conf = toml_parse_file(fp, errbuf, sizeof(errbuf));
-	fclose(fp);
-	
-	if (!conf) {
-		ELSA_FATAL("Failed to parse TOML material layout: %s", path);
-		return false;
+	CODE_BLOCK("Descriptor map reflection")
+	{
+		if (!RendererFrontendDescriptorMapCreate(&layout->Pack, &layout->DescMap)) {
+			ELSA_ERROR("Failed to create material layout descriptor map!");
+			return false;
+		}
 	}
-	
-	toml_table_t* shaders = toml_table_in(conf, "Shaders");
-	if (!shaders) {
-		ELSA_FATAL("Failed to parse shaders table from material layout: %s", path);
-		return false;
+
+	CODE_BLOCK("Pipeline creation")
+	{
+		if (!RendererFrontendRenderPipelineCreate(&layout->Pack, &layout->DescMap, &layout->Pipeline)) {
+			ELSA_ERROR("Failed to create material layout render pipeline!");
+			return false;
+		}
 	}
-	
-	toml_table_t* render_properties = toml_table_in(conf, "RenderProperties");
-	if (!render_properties) {
-		ELSA_FATAL("Failed to parse render properties table from material layout: %s", path);
-		return false;
-	}
-	
-	// Shaders
-	toml_datum_t pack_directory = toml_string_in(shaders, "PackDirectory");
-	ShaderPackCreate(pack_directory.u.s, &layout->Pack);
-	PlatformFree(pack_directory.u.s);
-	
-	// Render properties
-	toml_datum_t cull_mode = toml_string_in(render_properties, "CullMode");
-	layout->Pipeline.Config.Cull = GetCullModeFromString(cull_mode.u.s);
-	PlatformFree(cull_mode.u.s);
-	
-	toml_datum_t depth_op = toml_string_in(render_properties, "DepthOperation");
-	layout->Pipeline.Config.OP = GetCompareOPFromString(depth_op.u.s);
-	PlatformFree(depth_op.u.s);
-	
-	toml_datum_t front_face = toml_string_in(render_properties, "FrontFace");
-	layout->Pipeline.Config.Face = GetFrontFaceFromString(front_face.u.s);
-	PlatformFree(depth_op.u.s);
-	
-	toml_datum_t topology = toml_string_in(render_properties, "PrimitiveTopology");
-	layout->Pipeline.Config.Topology = GetPrimitiveTopologyFromString(topology.u.s);
-	PlatformFree(topology.u.s);
-	
-	toml_datum_t polygon_mode = toml_string_in(render_properties, "PolygonMode");
-	layout->Pipeline.Config.PolyMode = GetPolygonModeFromString(polygon_mode.u.s);
-	PlatformFree(polygon_mode.u.s);
-	
-	layout->Config = layout->Pipeline.Config;
-	
-	toml_free(conf);
-	
-	RendererFrontendRenderPipelineCreate(&layout->Pack, &layout->Pipeline);
 	
 	return true;
 }
 
 void MaterialLayoutDestroy(MaterialLayout* layout)
 {
+	RendererFrontendDescriptorMapDestroy(&layout->DescMap);
 	RendererFrontendRenderPipelineDestroy(&layout->Pipeline);
 	ShaderPackDestroy(&layout->Pack);
 }

@@ -175,7 +175,7 @@ VkResult MakeShaderModule(VulkanContext* ctx, VkShaderModule* out, u8* code, u64
     return vkCreateShaderModule(ctx->Device.LogicalDevice, &info, NULL, out);
 }
 
-b8 VulkanRenderPipelineCreate(VulkanContext* context, ShaderPack* pack, RenderPipeline* pipeline)
+b8 VulkanRenderPipelineCreate(VulkanContext* context, ShaderPack* pack, DescriptorMap* map, RenderPipeline* pipeline)
 {
 	VulkanRenderPipeline* backend = MemoryTrackerAlloc(sizeof(VulkanRenderPipeline), MEMORY_TAG_RENDERER);
 	pipeline->Pack = pack;
@@ -331,14 +331,32 @@ b8 VulkanRenderPipelineCreate(VulkanContext* context, ShaderPack* pack, RenderPi
     color_blending.blendConstants[2] = 0.0f;
     color_blending.blendConstants[3] = 0.0f;
 	
+    // Setup descriptor set layouts
+    VkDescriptorSetLayout* layouts = Darray_Create(VkDescriptorSetLayout);
+    if (map != NULL) {
+        VulkanDescriptorMap* map_backend = map->Internal;
+
+        for (u32 i = 0; i < map->SubmapCount; i++) {
+            for (u32 j = 0; j < map->Submaps[i].LayoutCount; j++) {
+                Darray_Push(layouts, map_backend->Submaps[i].Layouts[j].Layout);
+            }
+        }
+    }
+
 	VkPipelineLayoutCreateInfo pipeline_layout_info = {0};
     pipeline_layout_info.sType = VK_STRUCTURE_TYPE_PIPELINE_LAYOUT_CREATE_INFO;
-	
+	if (Darray_Length(layouts) != 0) {
+        pipeline_layout_info.setLayoutCount = Darray_Length(layouts);
+        pipeline_layout_info.pSetLayouts = layouts;
+    }
+
 	VkResult res = vkCreatePipelineLayout(context->Device.LogicalDevice, &pipeline_layout_info, NULL, &backend->PipelineLayout);
 	if (res != VK_SUCCESS) {
 		ELSA_FATAL("Failed to create pipeline layout!");
 		return false;
 	}
+
+    Darray_Destroy(layouts);
 	
 	// TODO(milo): dynamic rendering setup
 	VkGraphicsPipelineCreateInfo pipeline_info = {0};

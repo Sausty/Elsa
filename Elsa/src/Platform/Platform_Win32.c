@@ -85,6 +85,7 @@ b8 PlatformInit(ApplicationState* application_state)
 	platform_state.hInstance = GetModuleHandle(NULL);
     platform_state.app_state = application_state;
 	
+	// Load all the libraries
     platform_state.XInputLib = LoadLibraryA("xinput1_4.dll");
     if (!platform_state.XInputLib) {
         ELSA_FATAL("Failed to load XInput dll!");
@@ -106,6 +107,7 @@ b8 PlatformInit(ApplicationState* application_state)
         return false;
     }
 	
+	// Initialise the window
     HICON icon = LoadIcon(platform_state.hInstance, IDI_APPLICATION);
     
     WNDCLASSA wc;
@@ -192,12 +194,14 @@ void PlatformUpdateGamepads()
 {
     for (u16 i = 0; i < 4; i++)
     {
+		// Get the state of the gamepads
         XINPUT_STATE state;
         ZeroMemory(&state, sizeof(XINPUT_STATE));
 		
         DWORD result = XInputGetStateProc(i, &state);
         b8 connected = ERROR_SUCCESS == result;
 		
+		// If the gamepad's connection state changes, send an event
         if (connected != platform_state.Pads[i].Connected) {
             Event event;
             event.data.u16[0] = i;
@@ -209,12 +213,15 @@ void PlatformUpdateGamepads()
 		
         platform_state.Pads[i].Connected = connected;
 		
+		// If the gamepad is connected, poll inputs
         if (connected)
         {
+			// BATTERY INFO
             XINPUT_BATTERY_INFORMATION battery;
             PlatformZeroMemory(&battery, sizeof(battery));
             XInputGetBatteryInformationProc(i, BATTERY_DEVTYPE_GAMEPAD, &battery);
 			
+			// BUTTONS
             InputProcessGamepadBattery(i, XInputBatteryToFloat(battery.BatteryLevel));
 			
             InputProcessGamepadButton(i, GAMEPAD_A,              (state.Gamepad.wButtons & XINPUT_GAMEPAD_A) != 0);
@@ -232,12 +239,15 @@ void PlatformUpdateGamepads()
             InputProcessGamepadButton(i, GAMEPAD_RIGHT_THUMB,    (state.Gamepad.wButtons & XINPUT_GAMEPAD_RIGHT_THUMB) != 0);
             InputProcessGamepadButton(i, GAMEPAD_RIGHT_SHOULDER, (state.Gamepad.wButtons & XINPUT_GAMEPAD_RIGHT_SHOULDER) != 0);
 			
+			// TRIGGERS
             f32 left_trigger = (f32)state.Gamepad.bLeftTrigger / 255;
             f32 right_trigger = (f32)state.Gamepad.bRightTrigger / 255;
 			
             InputProcessGamepadTrigger(i, left_trigger, GAMEPAD_ANALOG_LEFT);
             InputProcessGamepadTrigger(i, right_trigger, GAMEPAD_ANALOG_RIGHT);
 			
+			
+			// THUMBSTICKS
             f32 normLX = Normalize((f32)state.Gamepad.sThumbLX, -32767, 32767);
             f32 normLY = Normalize((f32)state.Gamepad.sThumbLY, -32767, 32767);
 			
@@ -268,6 +278,7 @@ void PlatformUpdateGamepads()
             InputProcessGamepadJoystick(i, lx, ly, GAMEPAD_ANALOG_LEFT);
             InputProcessGamepadJoystick(i, rx, ry, GAMEPAD_ANALOG_RIGHT);
 			
+			// VIBRATION
             XINPUT_VIBRATION vibration;
             f32 rightSpeed;
             f32 leftSpeed;
@@ -287,6 +298,7 @@ void PlatformUpdateGamepads()
 
 b8 PlatformPumpMessages()
 {
+	// Poll events
     MSG msg;
     while (PeekMessageA(&msg, platform_state.hwnd, 0, 0, PM_REMOVE)) {
         TranslateMessage(&msg);
@@ -449,6 +461,7 @@ LRESULT CALLBACK PlatformProcessMessages(HWND hwnd, u32 msg, WPARAM w_param, LPA
 
 f32 XInputBatteryToFloat(BYTE battery_level)
 {
+	// Fuck off XInput, just give the flat amount of battery man...
     if (battery_level == BATTERY_LEVEL_EMPTY)
         return 0.0f;
     if (battery_level == BATTERY_LEVEL_LOW)
@@ -473,6 +486,7 @@ void PlatformGetRequiredExtensionNames(const char*** names_darray)
 
 void PlatformGetDirectoryFiles(const char* directory, char*** files_darray)
 {
+	// Thank you stack overflow
 	WIN32_FIND_DATAA data;
 	HANDLE hfind = FindFirstFileA(directory, &data);
 	

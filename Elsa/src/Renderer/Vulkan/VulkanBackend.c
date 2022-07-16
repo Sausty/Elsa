@@ -3,9 +3,13 @@
 #if defined(ELSA_VULKAN)
 
 #include <Core/Logger.h>
-#include <Platform/Platform.h>
 #include <Containers/Darray.h>
+
+#include <Platform/Platform.h>
+
+#include <SPIRV/spirv_reflect.h>
 #include <string.h>
+#include <stdio.h>
 
 #include "VulkanTypes.h"
 #include "VulkanDevice.h"
@@ -13,6 +17,7 @@
 #include "VulkanSwapchain.h"
 #include "VulkanCommandBuffer.h"
 #include "VulkanRenderPipeline.h"
+#include "VulkanDescriptorMap.h"
 
 static VulkanContext context;
 
@@ -154,6 +159,95 @@ void VulkanRendererBackendBufferFree(RendererBackend* backend, Buffer* buffer)
 	VulkanAllocatorBufferFree(&context.Allocator, buffer);
 }
 
+b8 VulkanRendererBackendDescriptorMapCreate(RendererBackend* backend, ShaderPack* pack, DescriptorMap* map)
+{
+	// Structure of a descriptor map:
+	//
+	// DESCRIPTOR_MAP
+	// [
+	// SHADER_STAGE (DescriptorSubmap):
+	//    DescriptorSetLayout 1 (DescriptorLayout):
+	//        Descriptor1 (Name, Binding, Count, Type) (DescriptorInfo)
+	//        Descriptor2 (Name, Binding, Count, Type) (DescriptorInfo)
+	//    DescriptorSetLayout 2 (DescriptorLayout):
+	//        Descriptor1 (Name, Binding, Count, Type) (DescriptorInfo)
+	//        Descriptor2 (Name, Binding, Count, Type) (DescriptorInfo)
+	// ]
+	//
+	// A DescriptorSubmap is the descriptor set layouts of a shader stage.
+	// A DescriptorLayout is the descriptors of a descriptor set layout.
+	// A DescriptorInfo holds all the information about a descriptor (name, binding, count, type)
+	// So basically:
+	// [DescriptorMap -> [DescriptorSubmap -> DescriptorLayout -> [DescriptorInfo]]]
+	
+	CODE_BLOCK("Reflection")
+	{
+		for (u32 i = 0; i < Darray_Length(pack->Modules); i++) {
+			ShaderModule* module = &pack->Modules[i];
+
+			SpvReflectShaderModule reflect;
+			SpvReflectResult result = spvReflectCreateShaderModule(module->ByteCodeSize, module->ByteCode, &reflect);
+			if (result != SPV_REFLECT_RESULT_SUCCESS) {
+				ELSA_ERROR("Failed to reflect descriptor map shader module!");
+				return false;
+			}
+
+			u32 count = 0;
+			result = spvReflectEnumerateDescriptorSets(&reflect, &count, NULL);
+			if (result != SPV_REFLECT_RESULT_SUCCESS) {
+				ELSA_ERROR("Failed to enumerate descriptor map sets!");
+				return false;
+			}
+
+			SpvReflectDescriptorSet* sets = PlatformAlloc(sizeof(SpvReflectDescriptorSet) * count);
+			result = spvReflectEnumerateDescriptorSets(&reflect, &count, &sets);
+			if (result != SPV_REFLECT_RESULT_SUCCESS) {
+				ELSA_ERROR("Failed to enumerate descriptor map sets!");
+				return false;
+			}
+
+			DescriptorSubmap* submap = &map->Submaps[(u32)module->Stage];
+			submap->Stage = module->Stage;
+
+			for (u32 i = 0; i < count; i++) {
+				SpvReflectDescriptorSet refl_set = sets[i];
+				for (u32 j = 0; j < refl_set.binding_count; j++) {
+					SpvReflectDescriptorBinding* refl_binding = refl_set.bindings[j];
+
+					sprintf(submap->Layouts[i].Descriptors[j].Name, "%s", refl_binding->name);
+					submap->Layouts[i].Descriptors[j].Binding = refl_binding->binding;
+					submap->Layouts[i].Descriptors[j].Type = (DescriptorType)refl_binding->descriptor_type;
+					submap->Layouts[i].Descriptors[j].Count = 1;
+					for (u32 dim = 0; dim < refl_binding->array.dims_count; dim++) {
+						submap->Layouts[i].Descriptors[j].Count *= refl_binding->array.dims[dim];
+					}
+					submap->Layouts[i].DescriptorCount++;
+				}
+				submap->LayoutCount++;
+			}
+
+			spvReflectDestroyShaderModule(&reflect);
+
+			map->SubmapCount++;
+		}
+	}
+
+	CODE_BLOCK("Backend creation")
+	{
+		if (!VulkanDescriptorMapCreate(&context, map)) {
+			ELSA_ERROR("Failed to create Vulkan backend for descriptor map.");
+			return false;
+		}
+	}
+
+	return true;
+}
+
+void VulkanRendererBackendDescriptorMapDestroy(RendererBackend* backend, DescriptorMap* map)
+{
+	VulkanDescriptorMapDestroy(&context, map);
+}
+
 b8 VulkanRendererBackendBeginFrame(RendererBackend* backend, f32 delta_time)
 {
 	VulkanDevice* device = &context.Device;
@@ -258,9 +352,9 @@ b8 VulkanRendererBackendEndFrame(RendererBackend* backend, f32 delta_time)
 	return true;
 }
 
-b8 VulkanRendererBackendRenderPipelineCreate(RendererBackend* backend, ShaderPack* pack, RenderPipeline* pipeline)
+b8 VulkanRendererBackendRenderPipelineCreate(RendererBackend* backend, ShaderPack* pack, DescriptorMap* map, RenderPipeline* pipeline)
 {
-	if (!VulkanRenderPipelineCreate(&context, pack, pipeline)) {
+	if (!VulkanRenderPipelineCreate(&context, pack, map, pipeline)) {
 		ELSA_FATAL("Failed to create render pipeline!");
 		return false;
 	}

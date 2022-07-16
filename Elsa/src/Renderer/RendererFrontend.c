@@ -49,14 +49,24 @@ void RendererFrontendResized(u16 width, u16 height)
         frontend.backend.Resized(&frontend.backend, width, height);
 }
 
-b8 RendererFrontendRenderPipelineCreate(ShaderPack* pack, RenderPipeline* pipeline)
+b8 RendererFrontendRenderPipelineCreate(ShaderPack* pack, DescriptorMap* map, RenderPipeline* pipeline)
 {
-	return frontend.backend.RenderPipelineCreate(&frontend.backend, pack, pipeline);
+	return frontend.backend.RenderPipelineCreate(&frontend.backend, pack, map, pipeline);
 }
 
 void RendererFrontendRenderPipelineDestroy(RenderPipeline* pipeline)
 {
 	frontend.backend.RenderPipelineDestroy(&frontend.backend, pipeline);
+}
+
+b8 RendererFrontendDescriptorMapCreate(ShaderPack* pack, DescriptorMap* map)
+{
+    return frontend.backend.DescriptorMapCreate(&frontend.backend, pack, map);
+}
+
+void RendererFrontendDescriptorMapDestroy(DescriptorMap* map)
+{
+    frontend.backend.DescriptorMapDestroy(&frontend.backend, map);
 }
 
 b8 RendererFrontendDrawFrame(f32 delta_time)

@@ -44,6 +44,23 @@ typedef struct Texture {
 	u32 Height;
 } Texture;
 
+typedef struct VulkanDescriptorSetLayout {
+	VkDescriptorSetLayout Layout;
+	VkDescriptorSetLayoutCreateInfo CreateInfo;
+	VkDescriptorSetLayoutBinding* Bindings;
+	u32 BindingCount;
+} VulkanDescriptorSetLayout;
+
+typedef struct VulkanDescriptorSubmap {
+	VulkanDescriptorSetLayout Layouts[8];
+	u32 LayoutCount;
+} VulkanDescriptorSubmap;
+
+typedef struct VulkanDescriptorMap {
+	VulkanDescriptorSubmap Submaps[SHADER_STAGE_MAX_STAGES];
+	u32 SubmapCount;
+} VulkanDescriptorMap;
+
 typedef struct VulkanShader {
 	VkShaderModule Module;
 	VkShaderStageFlagBits Stage;

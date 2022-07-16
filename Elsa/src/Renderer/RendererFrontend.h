@@ -38,10 +38,11 @@ ELSA_API void RendererFrontendResized(u16 width, u16 height);
 * @brief Creates a render pipeline.
 *
 * @param pack The shader pack to use.
+* @param map The descriptor map to use.
 * @param pipeline A pointer that will hold the created pipeline.
 * @returns True on success; otherwise false.
 */
-ELSA_API b8 RendererFrontendRenderPipelineCreate(ShaderPack* pack, RenderPipeline* pipeline);
+ELSA_API b8 RendererFrontendRenderPipelineCreate(ShaderPack* pack, DescriptorMap* map, RenderPipeline* pipeline);
 
 /**
 * @brief Destroys a render pipeline.
@@ -49,6 +50,20 @@ ELSA_API b8 RendererFrontendRenderPipelineCreate(ShaderPack* pack, RenderPipelin
 * @param pipeline The render pipeline to destroy.
 */
 ELSA_API void RendererFrontendRenderPipelineDestroy(RenderPipeline* pipeline);
+
+/**
+ * @brief Creates a backend for the descriptor map.
+ * @param pack The shader pack that the descriptor map will use.
+ * @param map A pointer to hold the resulting descriptor map.
+ * @returns True on success; otherwise false.
+ */
+ELSA_API b8 RendererFrontendDescriptorMapCreate(ShaderPack* pack, DescriptorMap* map);
+
+/**
+  * @brief Destroys a descriptor map.
+  * @param map The descriptor map to destroy.
+  */
+ELSA_API void RendererFrontendDescriptorMapDestroy(DescriptorMap* map);
 
 /**
  * @brief Draws the frame.
